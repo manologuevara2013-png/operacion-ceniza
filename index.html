@@ -1,0 +1,921 @@
+<title>Operación Ceniza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap">
+<style>
+:root{--bg:#EDE7DA;--surface:#F5F0E5;--s2:#FDFAF3;--bd:#BEB49E;--bd2:#D4C8B0;--gold:#7A5C14;--goldhi:#9E7A1E;--red:#8B2020;--green:#1A6B3C;--greenbg:#D4EDE0;--tx:#1C1610;--tx2:#5A4E3C;--tx3:#9A8E7A;--sh:rgba(0,0,0,.12);--scan:rgba(0,0,0,.025)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B0F18;--surface:#131824;--s2:#1A2235;--bd:#26334D;--bd2:#1E2A3F;--gold:#C9A84B;--goldhi:#E0BF6A;--red:#C23B2E;--green:#3AAF6B;--greenbg:rgba(58,175,107,.12);--tx:#D2CCBF;--tx2:#8896AA;--tx3:#384560;--sh:rgba(0,0,0,.5);--scan:rgba(255,255,255,.012)}}
+:root[data-theme="dark"]{--bg:#0B0F18;--surface:#131824;--s2:#1A2235;--bd:#26334D;--bd2:#1E2A3F;--gold:#C9A84B;--goldhi:#E0BF6A;--red:#C23B2E;--green:#3AAF6B;--greenbg:rgba(58,175,107,.12);--tx:#D2CCBF;--tx2:#8896AA;--tx3:#384560;--sh:rgba(0,0,0,.5);--scan:rgba(255,255,255,.012)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--tx);font-family:'DM Sans',system-ui,sans-serif;font-size:14px;line-height:1.5}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(0deg,var(--scan) 0,var(--scan) 1px,transparent 1px,transparent 4px)}
+
+/* INTRO */
+#intro{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;padding:40px;transition:opacity .5s}
+#intro.gone{opacity:0;pointer-events:none}
+.intro-caseid{font-family:'Courier Prime',monospace;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--tx3);margin-bottom:16px}
+.intro-stamp{font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;letter-spacing:.3em;color:var(--red);border:3px solid var(--red);padding:4px 18px;margin-bottom:24px;opacity:0;transform:scale(1.4) rotate(-8deg);animation:stamp-in .5s cubic-bezier(.22,1,.36,1) .6s forwards}
+@keyframes stamp-in{to{opacity:.9;transform:scale(1) rotate(-3deg)}}
+.intro-title{font-family:'Oswald',sans-serif;font-size:clamp(42px,8vw,72px);font-weight:700;letter-spacing:.05em;text-align:center;line-height:.95;color:var(--tx);margin-bottom:8px;opacity:0;animation:fade-rise .6s ease .2s forwards}
+.intro-sub{font-family:'Courier Prime',monospace;font-size:13px;color:var(--tx2);text-align:center;margin-bottom:32px;max-width:480px;line-height:1.6;opacity:0;animation:fade-rise .6s ease .4s forwards}
+@keyframes fade-rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.intro-stats{display:flex;gap:40px;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);padding:16px 0;margin-bottom:32px;opacity:0;animation:fade-rise .6s ease .8s forwards}
+.istat{text-align:center}.istat-val{font-family:'Oswald',sans-serif;font-size:28px;font-weight:700;color:var(--red);line-height:1}.istat-lbl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);margin-top:3px}
+.intro-btn{opacity:0;animation:fade-rise .6s ease 1s forwards}
+
+/* APP SHELL */
+#app{display:none;flex-direction:column;height:100vh}
+#app.active{display:flex}
+#topbar{display:flex;align-items:center;gap:14px;padding:0 20px;height:48px;background:var(--surface);border-bottom:1px solid var(--bd);flex-shrink:0;z-index:10}
+.tb-caseid{font-family:'Courier Prime',monospace;font-size:11px;color:var(--tx3);letter-spacing:.12em;text-transform:uppercase}
+.tb-title{font-family:'Oswald',sans-serif;font-size:15px;font-weight:600;letter-spacing:.06em;color:var(--tx);flex:1}
+.tb-phase{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border:1px solid var(--bd);color:var(--tx2)}
+.tb-phase.live{border-color:var(--gold);color:var(--gold)}
+.tb-timer{font-family:'Courier Prime',monospace;font-size:14px;font-weight:700;letter-spacing:.08em;color:var(--red);min-width:90px;text-align:right}
+.tb-timer.urgent{animation:pulse-r 1s ease-in-out infinite}
+@keyframes pulse-r{0%,100%{opacity:1}50%{opacity:.45}}
+#layout{display:flex;flex:1;overflow:hidden}
+
+/* SIDEBAR */
+#sidebar{width:220px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden}
+.sb-sec{padding:14px 14px 10px;border-bottom:1px solid var(--bd2)}
+.sb-lbl{font-family:'Oswald',sans-serif;font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--tx3);margin-bottom:10px}
+.sb-scroll{overflow-y:auto;flex:1}
+.rbadge{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px}
+.rbadge-icon{width:24px;height:24px;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--gold);font-family:'Oswald',sans-serif;font-weight:700;flex-shrink:0}
+.rbadge-name{font-weight:600;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--tx)}
+.rbadge-player{font-size:10px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'Courier Prime',monospace}
+.ev-item{padding:7px 14px;border-bottom:1px solid var(--bd2);animation:slide-in .4s ease}
+@keyframes slide-in{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.ev-tag{font-family:'Oswald',sans-serif;font-size:9px;font-weight:700;letter-spacing:.15em;color:var(--green);text-transform:uppercase;margin-bottom:2px}
+.ev-text{font-family:'Courier Prime',monospace;font-size:11px;color:var(--tx2);line-height:1.4}
+
+/* Base evidence: visible from act1 onwards */
+.ev-base{display:none}
+#game[data-phase="act1"] .ev-base,
+#game[data-phase="act2"] .ev-base,
+#game[data-phase="act2reveal"] .ev-base,
+#game[data-phase="act3"] .ev-base,
+#game[data-phase="outcome"] .ev-base{display:block}
+
+/* Option evidence: visible when that option is chosen */
+.ev-opt{display:none}
+#game[data-act2choices*="opt1"] .ev-opt[data-opt="opt1"]{display:block}
+#game[data-act2choices*="opt2"] .ev-opt[data-opt="opt2"]{display:block}
+#game[data-act2choices*="opt3"] .ev-opt[data-opt="opt3"]{display:block}
+#game[data-act2choices*="opt4"] .ev-opt[data-opt="opt4"]{display:block}
+
+/* CONTENT AREA */
+#content{flex:1;overflow-y:auto;overflow-x:hidden;position:relative}
+.ci{padding:32px 40px;max-width:820px;margin:0 auto;animation:fade-in .4s ease}
+@keyframes fade-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* PHASES */
+.phase{display:none}
+#game[data-phase="roles"] #phase-roles{display:block}
+#game[data-phase="act1"] #phase-act1{display:block}
+#game[data-phase="act2"] #phase-act2{display:block}
+#game[data-phase="act2reveal"] #phase-act2reveal{display:block}
+#game[data-phase="act3"] #phase-act3{display:block}
+#game[data-phase="outcome"] #phase-outcome{display:block}
+
+/* TYPOGRAPHY */
+.eyebrow{font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--tx3);margin-bottom:6px}
+.ph-title{font-family:'Oswald',sans-serif;font-size:36px;font-weight:700;letter-spacing:.04em;color:var(--tx);line-height:1.05;margin-bottom:6px;text-wrap:balance}
+.ph-sub{font-size:13px;color:var(--tx2);margin-bottom:28px;max-width:580px}
+.divider{height:1px;background:var(--bd);margin:24px 0}
+
+/* DOC BLOCKS */
+.doc{border:1px solid var(--bd);background:var(--s2);padding:20px 24px;margin-bottom:20px;position:relative}
+.doc::before{content:attr(data-label);position:absolute;top:-1px;right:20px;transform:translateY(-50%);background:var(--s2);padding:0 8px;font-family:'Courier Prime',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+.doc-txt{font-family:'Courier Prime',monospace;font-size:13px;line-height:1.7;color:var(--tx2)}
+.doc-txt strong{color:var(--tx);font-weight:700}
+.stamp{display:inline-block;border:2px solid var(--red);color:var(--red);font-family:'Oswald',sans-serif;font-size:10px;font-weight:700;letter-spacing:.2em;padding:2px 8px;transform:rotate(-2deg);opacity:.9}
+.stamp.gold{border-color:var(--gold);color:var(--gold);transform:rotate(1.5deg)}
+.stamp.gr{border-color:var(--green);color:var(--green);transform:rotate(-1deg)}
+
+/* ROLES GRID */
+.roles-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.rcard{border:1px solid var(--bd);background:var(--s2);padding:16px;position:relative;transition:border-color .2s}
+.rcard.assigned{border-color:var(--green)}
+.rcard.assigned::after{content:'\2713';position:absolute;top:8px;right:10px;color:var(--green);font-size:14px;font-weight:700}
+.rcard-num{font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;color:var(--gold);line-height:1;margin-bottom:6px}
+.rcard-title{font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--tx);margin-bottom:4px;line-height:1.3}
+.rcard-desc{font-size:11px;color:var(--tx2);line-height:1.4;margin-bottom:10px}
+.rinput{width:100%;background:var(--bg);border:1px solid var(--bd);color:var(--tx);font-family:'Courier Prime',monospace;font-size:12px;padding:5px 8px;outline:none;transition:border-color .2s}
+.rinput:focus{border-color:var(--gold)}
+.rinput::placeholder{color:var(--tx3);font-style:italic}
+.role-hint{font-size:11px;color:var(--tx3);font-family:'Courier Prime',monospace}
+
+/* OPTION CARDS */
+.opts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:24px}
+.ocard{border:1px solid var(--bd);background:var(--s2);padding:18px 20px;cursor:pointer;transition:border-color .2s,background .2s,transform .15s;user-select:none;position:relative}
+.ocard:hover{border-color:var(--gold);transform:translateY(-2px)}
+.ocard.selected{border-color:var(--gold);background:var(--bg);box-shadow:0 0 0 1px var(--gold)}
+.ocard.disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.ocard.disabled:hover{border-color:var(--bd);transform:none}
+.ocard-num{font-family:'Oswald',sans-serif;font-size:24px;font-weight:700;color:var(--tx3);line-height:1;margin-bottom:6px;transition:color .2s}
+.ocard.selected .ocard-num{color:var(--gold)}
+.ocard-title{font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--tx);margin-bottom:6px}
+.ocard-desc{font-size:12px;color:var(--tx2);line-height:1.5}
+.ocard-role{margin-top:10px;font-family:'Courier Prime',monospace;font-size:10px;color:var(--gold);letter-spacing:.1em;text-transform:uppercase}
+.ocard-mark{position:absolute;top:12px;right:14px;font-family:'Courier Prime',monospace;font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.1em;opacity:0;transition:opacity .2s}
+.ocard.selected .ocard-mark{opacity:1}
+.riskbar{display:flex;gap:3px;margin-top:10px}.rseg{height:3px;flex:1;background:var(--bd);transition:background .3s}
+.riskbar[data-risk="1"] .rseg:nth-child(1){background:var(--green)}
+.riskbar[data-risk="2"] .rseg:nth-child(-n+2){background:var(--gold)}
+.riskbar[data-risk="3"] .rseg{background:var(--red)}
+.risklbl{font-size:10px;color:var(--tx3);font-family:'Courier Prime',monospace;letter-spacing:.1em;text-transform:uppercase;margin-top:4px}
+.sel-ctr{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--bd);font-family:'Courier Prime',monospace;font-size:12px;color:var(--tx2);margin-bottom:16px}
+.sel-ctr .cnt{color:var(--gold);font-weight:700;font-size:16px;min-width:1ch;text-align:center}
+
+/* ACT2 selection state via data attribute on #game */
+#game[data-act2choices*="opt1"] #oc-opt1{border-color:var(--gold);background:var(--bg);box-shadow:0 0 0 1px var(--gold)}
+#game[data-act2choices*="opt1"] #oc-opt1 .ocard-num{color:var(--gold)}
+#game[data-act2choices*="opt1"] #oc-opt1 .ocard-mark{opacity:1}
+#game[data-act2choices*="opt2"] #oc-opt2{border-color:var(--gold);background:var(--bg);box-shadow:0 0 0 1px var(--gold)}
+#game[data-act2choices*="opt2"] #oc-opt2 .ocard-num{color:var(--gold)}
+#game[data-act2choices*="opt2"] #oc-opt2 .ocard-mark{opacity:1}
+#game[data-act2choices*="opt3"] #oc-opt3{border-color:var(--gold);background:var(--bg);box-shadow:0 0 0 1px var(--gold)}
+#game[data-act2choices*="opt3"] #oc-opt3 .ocard-num{color:var(--gold)}
+#game[data-act2choices*="opt3"] #oc-opt3 .ocard-mark{opacity:1}
+#game[data-act2choices*="opt4"] #oc-opt4{border-color:var(--gold);background:var(--bg);box-shadow:0 0 0 1px var(--gold)}
+#game[data-act2choices*="opt4"] #oc-opt4 .ocard-num{color:var(--gold)}
+#game[data-act2choices*="opt4"] #oc-opt4 .ocard-mark{opacity:1}
+
+/* ACT2 disabled state when 2 already chosen */
+#game[data-act2choices*=","] #oc-opt1:not(.selected-pure),
+#game[data-act2choices*=","] #oc-opt2:not(.selected-pure),
+#game[data-act2choices*=","] #oc-opt3:not(.selected-pure),
+#game[data-act2choices*=","] #oc-opt4:not(.selected-pure){opacity:.4;cursor:not-allowed;transform:none!important}
+/* Un-disable selected ones */
+#game[data-act2choices*=","][data-act2choices*="opt1"] #oc-opt1,
+#game[data-act2choices*=","][data-act2choices*="opt2"] #oc-opt2,
+#game[data-act2choices*=","][data-act2choices*="opt3"] #oc-opt3,
+#game[data-act2choices*=","][data-act2choices*="opt4"] #oc-opt4{opacity:1;cursor:pointer}
+
+/* ACT2 reveal: show only chosen results */
+.res-card{display:none;border:1px solid var(--bd);background:var(--s2);margin-bottom:20px}
+#game[data-act2choices*="opt1"] #res-opt1{display:block}
+#game[data-act2choices*="opt2"] #res-opt2{display:block}
+#game[data-act2choices*="opt3"] #res-opt3{display:block}
+#game[data-act2choices*="opt4"] #res-opt4{display:block}
+.res-hdr{background:var(--surface);border-bottom:1px solid var(--bd);padding:10px 20px;display:flex;align-items:center;justify-content:space-between}
+.res-title{font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--tx)}
+.res-body{padding:18px 20px}
+.res-findings{list-style:none;display:flex;flex-direction:column;gap:8px}
+.res-finding{display:flex;gap:10px;font-family:'Courier Prime',monospace;font-size:12px;color:var(--tx2);line-height:1.5}
+.res-finding::before{content:'\25B8';color:var(--gold);flex-shrink:0;margin-top:1px}
+
+/* ACT3 selection via data-finalchoice */
+#game[data-finalchoice="final1"] #fc-final1{border-color:var(--gold);background:var(--bg);box-shadow:0 0 0 1px var(--gold)}
+#game[data-finalchoice="final1"] #fc-final1 .ocard-num{color:var(--gold)}
+#game[data-finalchoice="final1"] #fc-final1 .ocard-mark{opacity:1}
+#game[data-finalchoice="final2"] #fc-final2{border-color:var(--gold);background:var(--bg);box-shadow:0 0 0 1px var(--gold)}
+#game[data-finalchoice="final2"] #fc-final2 .ocard-num{color:var(--gold)}
+#game[data-finalchoice="final2"] #fc-final2 .ocard-mark{opacity:1}
+#game[data-finalchoice="final3"] #fc-final3{border-color:var(--gold);background:var(--bg);box-shadow:0 0 0 1px var(--gold)}
+#game[data-finalchoice="final3"] #fc-final3 .ocard-num{color:var(--gold)}
+#game[data-finalchoice="final3"] #fc-final3 .ocard-mark{opacity:1}
+
+/* OUTCOME */
+.out-card{display:none}
+#game[data-outcome="victoria"] #out-victoria{display:block}
+#game[data-outcome="parcial"] #out-parcial{display:block}
+#game[data-outcome="derrota"] #out-derrota{display:block}
+.out-hero{text-align:center;padding:24px 0 32px}
+.out-verdict{font-family:'Oswald',sans-serif;font-size:52px;font-weight:700;letter-spacing:.06em;line-height:1;margin-bottom:8px}
+.out-verdict.v{color:var(--green)}.out-verdict.p{color:var(--gold)}.out-verdict.d{color:var(--red)}
+.out-sub{font-family:'Courier Prime',monospace;font-size:14px;color:var(--tx2);max-width:540px;margin:0 auto 24px;line-height:1.6}
+.out-chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:32px}
+.chip{border:1px solid var(--bd);padding:4px 12px;font-family:'Courier Prime',monospace;font-size:11px;color:var(--tx2)}
+.chip.key{border-color:var(--gold);color:var(--gold)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border:none;outline:none;transition:opacity .2s,transform .15s;background:none}
+.btn:active{transform:translateY(1px)}
+.btn-p{background:var(--gold);color:var(--bg);padding:11px 28px}.btn-p:hover{opacity:.9}.btn-p:disabled{opacity:.3;cursor:not-allowed;transform:none}
+.btn-s{border:1px solid var(--bd);color:var(--tx2)}.btn-s:hover{border-color:var(--gold);color:var(--gold)}
+.btn-d{background:var(--red);color:#fff;padding:11px 28px}.btn-d:hover{opacity:.88}.btn-d:disabled{opacity:.3;cursor:not-allowed;transform:none}
+.btn-row{display:flex;align-items:center;gap:14px;margin-top:24px;flex-wrap:wrap}
+.btn-hint{font-size:11px;color:var(--tx3);font-family:'Courier Prime',monospace}
+
+/* TOAST */
+#toasts{position:fixed;bottom:20px;right:20px;z-index:10000;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--s2);border:1px solid var(--bd);color:var(--tx);padding:10px 16px;font-family:'DM Sans',sans-serif;font-size:12px;max-width:300px;box-shadow:0 4px 12px var(--sh);animation:fade-in .3s ease;line-height:1.4}
+.toast.err{border-color:var(--red);color:var(--red)}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bd)}::-webkit-scrollbar-thumb:hover{background:var(--gold)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* ── LOBBY ── */
+#lobby{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;padding:40px;transition:opacity .4s}
+#lobby.gone{opacity:0;pointer-events:none}
+.lb-brand{font-family:'Courier Prime',monospace;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--tx3);margin-bottom:20px}
+.lb-title{font-family:'Oswald',sans-serif;font-size:clamp(36px,7vw,60px);font-weight:700;letter-spacing:.05em;text-align:center;line-height:.95;color:var(--tx);margin-bottom:10px}
+.lb-sub{font-family:'Courier Prime',monospace;font-size:12px;color:var(--tx2);text-align:center;max-width:440px;line-height:1.6;margin-bottom:36px}
+.lb-panel{background:var(--surface);border:1px solid var(--bd);padding:26px;width:100%;max-width:400px;margin-bottom:14px}
+.lb-lbl{font-family:'Oswald',sans-serif;font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--tx3);margin-bottom:10px}
+.lb-panel .btn{width:100%;padding:14px}
+.lb-or{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.3em;color:var(--tx3);margin:8px 0}
+.lb-input{width:100%;padding:14px;background:var(--s2);border:1px solid var(--bd);color:var(--tx);font-family:'Courier Prime',monospace;font-size:20px;font-weight:700;letter-spacing:.3em;text-align:center;text-transform:uppercase;margin-bottom:10px}
+.lb-input:focus{outline:2px solid var(--gold);outline-offset:2px}
+.lb-status{font-family:'Courier Prime',monospace;font-size:11px;color:var(--tx2);text-align:center;margin-top:12px;min-height:16px}
+.lb-status.err{color:var(--red)}
+.lb-status.ok{color:var(--green)}
+.room-badge{position:fixed;top:6px;right:12px;font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:.2em;color:var(--gold);z-index:50;background:var(--surface);padding:3px 10px;border:1px solid var(--bd)}
+.sync-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:6px;vertical-align:middle;animation:sync-p 2s ease-in-out infinite}
+@keyframes sync-p{0%,100%{opacity:.4}50%{opacity:1}}
+</style>
+
+<!-- ── LOBBY (room create / join) ── -->
+<div id="lobby">
+  <div class="lb-brand">CASO #CEN-2024-0815 · CLASIFICADO</div>
+  <h1 class="lb-title">Operación<br>Ceniza</h1>
+  <p class="lb-sub">Multijugador en tiempo real. Un jugador crea una sala, los demás se unen con el código.</p>
+
+  <div class="lb-panel">
+    <div class="lb-lbl">Crear nueva investigación</div>
+    <button class="btn btn-p" onclick="createRoom()">Crear sala</button>
+  </div>
+
+  <div class="lb-or">— O —</div>
+
+  <div class="lb-panel">
+    <div class="lb-lbl">Unirse a una sala existente</div>
+    <input class="lb-input" id="join-code" maxlength="4" placeholder="XXXX" autocomplete="off" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+    <button class="btn btn-s" onclick="joinRoom()" style="width:100%">Unirse</button>
+  </div>
+
+  <div class="lb-status" id="lb-status"></div>
+</div>
+
+<div id="room-badge" class="room-badge" style="display:none"><span class="sync-dot"></span>SALA <span id="room-code-badge">—</span></div>
+
+<div id="game" data-phase="" data-act2choices="" data-finalchoice="" data-outcome="" data-starttime="">
+
+<!-- ── INTRO ── -->
+<div id="intro">
+  <div class="intro-caseid">CASO #CEN-2024-0815 · CIUDAD DE GREYWATER</div>
+  <div class="intro-stamp">CLASIFICADO · NIVEL ALFA</div>
+  <h1 class="intro-title">Operación<br>Ceniza</h1>
+  <p class="intro-sub">Un coche bomba. Quince muertos. Una ingeniería de la verdad que alguien pagó muy caro para enterrar.</p>
+  <div class="intro-stats">
+    <div class="istat"><div class="istat-val">15</div><div class="istat-lbl">Víctimas</div></div>
+    <div class="istat"><div class="istat-val">48H</div><div class="istat-lbl">Límite</div></div>
+    <div class="istat"><div class="istat-val">8</div><div class="istat-lbl">Agentes</div></div>
+  </div>
+  <div class="intro-btn"><button class="btn btn-p" onclick="startGame()">Iniciar Investigación</button></div>
+</div>
+
+<!-- ── APP ── -->
+<div id="app">
+  <div id="topbar">
+    <div class="tb-caseid">CEN-2024-0815</div>
+    <div class="tb-title">OPERACIÓN CENIZA</div>
+    <div class="tb-phase" id="phase-badge">—</div>
+    <div class="tb-timer" id="countdown">48:00:00</div>
+  </div>
+  <div id="layout">
+    <aside id="sidebar">
+      <div class="sb-sec">
+        <div class="sb-lbl">Equipo</div>
+        <div class="rbadge"><div class="rbadge-icon">JO</div><div><div class="rbadge-name">Jefe de Ops</div><div class="rbadge-player" id="rb-jefe">—</div></div></div>
+        <div class="rbadge"><div class="rbadge-icon">EX</div><div><div class="rbadge-name">Explosivos</div><div class="rbadge-player" id="rb-explosivos">—</div></div></div>
+        <div class="rbadge"><div class="rbadge-icon">CI</div><div><div class="rbadge-name">Ciberint.</div><div class="rbadge-player" id="rb-hacker">—</div></div></div>
+        <div class="rbadge"><div class="rbadge-icon">PC</div><div><div class="rbadge-name">Perfilador</div><div class="rbadge-player" id="rb-perfilador">—</div></div></div>
+        <div class="rbadge"><div class="rbadge-icon">IC</div><div><div class="rbadge-name">Campo</div><div class="rbadge-player" id="rb-campo">—</div></div></div>
+        <div class="rbadge"><div class="rbadge-icon">AF</div><div><div class="rbadge-name">Financiero</div><div class="rbadge-player" id="rb-financiero">—</div></div></div>
+        <div class="rbadge"><div class="rbadge-icon">MF</div><div><div class="rbadge-name">Forense</div><div class="rbadge-player" id="rb-forense">—</div></div></div>
+        <div class="rbadge"><div class="rbadge-icon">OE</div><div><div class="rbadge-name">Enlace Pol.</div><div class="rbadge-player" id="rb-politico">—</div></div></div>
+      </div>
+      <div class="sb-scroll">
+        <div class="sb-sec"><div class="sb-lbl">Expediente · Evidencias</div></div>
+        <div id="ev-list">
+          <div class="ev-item ev-base"><div class="ev-tag">BALÍSTICA</div><div class="ev-text">Explosivo RDX militar — no casero. Alta precisión.</div></div>
+          <div class="ev-item ev-base"><div class="ev-tag">FORENSE</div><div class="ev-text">Metralla con microchips de silicio y aleación de titanio.</div></div>
+          <div class="ev-item ev-base"><div class="ev-tag">FINANCIERO</div><div class="ev-text">Furgoneta: Caimán → Vanguard Solutions → Aether Corp.</div></div>
+          <div class="ev-item ev-base"><div class="ev-tag">VÍCTIMA</div><div class="ev-text">Elena Vance (Aether Corp) entre los muertos. No fue al azar.</div></div>
+          <div class="ev-item ev-opt" data-opt="opt1"><div class="ev-tag">CAMPO</div><div class="ev-text">Marcus Thorne: ex-empleado despedido por robar prototipos.</div></div>
+          <div class="ev-item ev-opt" data-opt="opt1"><div class="ev-tag">CAMPO</div><div class="ev-text">Directivos de Aether Corp: declaraciones contradictorias.</div></div>
+          <div class="ev-item ev-opt" data-opt="opt2"><div class="ev-tag">TÉCNICO</div><div class="ev-text">PROYECTO ÍCARO: tecnología de espionaje cuántico.</div></div>
+          <div class="ev-item ev-opt" data-opt="opt2"><div class="ev-tag">TÉCNICO</div><div class="ev-text">El atentado buscaba destruir el prototipo, no solo matar.</div></div>
+          <div class="ev-item ev-opt" data-opt="opt3"><div class="ev-tag">VIGILANCIA</div><div class="ev-text">Comprador: testaferro de Blackwood Security (mercenarios).</div></div>
+          <div class="ev-item ev-opt" data-opt="opt3"><div class="ev-tag">VIGILANCIA</div><div class="ev-text">Blackwood Security: ejecutores del atentado por contrato.</div></div>
+          <div class="ev-item ev-opt" data-opt="opt4"><div class="ev-tag">¡ALERTA!</div><div class="ev-text">¡FALSA BANDERA! La Falange Gris no existe.</div></div>
+          <div class="ev-item ev-opt" data-opt="opt4"><div class="ev-tag">INT.</div><div class="ev-text">Video generado por IA desde servidores de Aether Corp.</div></div>
+        </div>
+      </div>
+    </aside>
+
+    <main id="content">
+      <div class="ci">
+
+        <!-- PHASE: ROLES -->
+        <section class="phase" id="phase-roles">
+          <div class="eyebrow">Asignación · Equipo de Investigación</div>
+          <h1 class="ph-title">Designación de Agentes</h1>
+          <p class="ph-sub">El Jefe de Operaciones coordina la asignación. Los nombres aparecen en tiempo real para todos.</p>
+          <div class="roles-grid">
+            <div class="rcard" id="rc-jefe">
+              <div class="rcard-num">01</div>
+              <div class="rcard-title">Jefe/a de Operaciones</div>
+              <div class="rcard-desc">Coordina el equipo, administra recursos y tiene voto de desempate.</div>
+              <input class="rinput" id="inp-jefe" placeholder="Nombre del agente…" oninput="setRole('jefe',this)">
+            </div>
+            <div class="rcard" id="rc-explosivos">
+              <div class="rcard-num">02</div>
+              <div class="rcard-title">Experto/a en Explosivos</div>
+              <div class="rcard-desc">Analiza componentes químicos, cráteres y restos de armamento.</div>
+              <input class="rinput" id="inp-explosivos" placeholder="Nombre del agente…" oninput="setRole('explosivos',this)">
+            </div>
+            <div class="rcard" id="rc-hacker">
+              <div class="rcard-num">03</div>
+              <div class="rcard-title">Analista Ciberinteligencia</div>
+              <div class="rcard-desc">Rastrea servidores, cámaras, metadatos y comunicaciones.</div>
+              <input class="rinput" id="inp-hacker" placeholder="Nombre del agente…" oninput="setRole('hacker',this)">
+            </div>
+            <div class="rcard" id="rc-perfilador">
+              <div class="rcard-num">04</div>
+              <div class="rcard-title">Perfilador Criminal</div>
+              <div class="rcard-desc">Estudia el modus operandi y la psicología del culpable.</div>
+              <input class="rinput" id="inp-perfilador" placeholder="Nombre del agente…" oninput="setRole('perfilador',this)">
+            </div>
+            <div class="rcard" id="rc-campo">
+              <div class="rcard-num">05</div>
+              <div class="rcard-title">Investigador/a de Campo</div>
+              <div class="rcard-desc">Trata con testigos, informantes y sospechosos detenidos.</div>
+              <input class="rinput" id="inp-campo" placeholder="Nombre del agente…" oninput="setRole('campo',this)">
+            </div>
+            <div class="rcard" id="rc-financiero">
+              <div class="rcard-num">06</div>
+              <div class="rcard-title">Analista Financiero</div>
+              <div class="rcard-desc">Sigue el dinero: cuentas offshore y empresas fantasma.</div>
+              <input class="rinput" id="inp-financiero" placeholder="Nombre del agente…" oninput="setRole('financiero',this)">
+            </div>
+            <div class="rcard" id="rc-forense">
+              <div class="rcard-num">07</div>
+              <div class="rcard-title">Médico/a Forense</div>
+              <div class="rcard-desc">Examina víctimas, metralla y causa exacta de muerte.</div>
+              <input class="rinput" id="inp-forense" placeholder="Nombre del agente…" oninput="setRole('forense',this)">
+            </div>
+            <div class="rcard" id="rc-politico">
+              <div class="rcard-num">08</div>
+              <div class="rcard-title">Oficial Enlace Político</div>
+              <div class="rcard-desc">Gestiona la presión mediática y consigue órdenes judiciales.</div>
+              <input class="rinput" id="inp-politico" placeholder="Nombre del agente…" oninput="setRole('politico',this)">
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="doc" data-label="Situación · Preámbulo del caso">
+            <p class="doc-txt">Ayer a las 08:15 AM, un coche bomba explotó en el andén principal de la <strong>Estación Central</strong>. Quince muertos. Entre las víctimas: <strong>Elena Vance</strong>, ingeniera de <strong>Aether Corp</strong>. El grupo <strong>"La Falange Gris"</strong> reivindicó el ataque. La ciudad exige respuestas. Tienen 48 horas.</p>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-p" onclick="goAct1()">Abrir Expediente · Acto I →</button>
+            <span class="btn-hint role-hint" id="role-hint">Asigna al menos un agente para continuar</span>
+          </div>
+        </section>
+
+        <!-- PHASE: ACT I -->
+        <section class="phase" id="phase-act1">
+          <div class="eyebrow">Acto I · La Escena del Crimen</div>
+          <h1 class="ph-title">El Atentado en la Estación Central</h1>
+          <p class="ph-sub">El equipo forense y balístico ha procesado la escena. Los primeros hallazgos son <strong>perturbadores</strong>.</p>
+          <div class="doc" data-label="Informe Inicial · Balística y Explosivos">
+            <p class="doc-txt">El análisis del cráter revela que el explosivo no fue casero. Se trata de <strong>RDX de grado militar</strong>, con presencia de microchips de silicio y aleación de titanio en la metralla. El artefacto fue diseñado para <strong>destruir un objetivo específico</strong>, no simplemente causar daño masivo.</p>
+          </div>
+          <div class="doc" data-label="Informe Inicial · Financiero y Logístico">
+            <p class="doc-txt">La furgoneta fue adquirida mediante transferencia bancaria desde una cuenta en Islas Caimán, a nombre de <strong>"Vanguard Solutions"</strong>, empresa fantasma subsidiaria indirecta de <strong>Aether Corp</strong> — la empresa de Elena Vance.</p>
+          </div>
+          <div class="divider"></div>
+          <div style="display:flex;gap:16px;align-items:center;margin-bottom:24px;flex-wrap:wrap">
+            <span class="stamp">Clasificado · Alfa</span>
+            <span class="stamp gold">Pruebas recabadas: 4</span>
+            <span class="stamp gr">Acto I completado</span>
+          </div>
+          <p style="font-family:'Courier Prime',monospace;font-size:12px;color:var(--tx2);margin-bottom:24px">Cuatro evidencias incorporadas al expediente. El rastro apunta a <strong>Aether Corp</strong>. Es hora de profundizar.</p>
+          <div class="btn-row"><button class="btn btn-p" onclick="goAct2()">Avanzar al Acto II →</button></div>
+        </section>
+
+        <!-- PHASE: ACT II -->
+        <section class="phase" id="phase-act2">
+          <div class="eyebrow">Acto II · Líneas de Investigación</div>
+          <h1 class="ph-title">Elijan 2 Frentes</h1>
+          <p class="ph-sub">El equipo tiene recursos y tiempo limitados. Debatan y elijan exactamente <strong>2 de las 4 líneas de investigación</strong>. El Jefe confirma la elección.</p>
+          <div class="sel-ctr">Seleccionadas: <span class="cnt" id="sel-cnt">0</span> / 2</div>
+          <div class="opts-grid">
+            <div class="ocard" id="oc-opt1" onclick="toggleOpt('opt1')">
+              <div class="ocard-mark">SELECCIONADA</div>
+              <div class="ocard-num">A</div>
+              <div class="ocard-title">Allanamiento a Aether Corp</div>
+              <div class="ocard-desc">Interrogar a los directivos sobre la empresa fantasma Vanguard Solutions.</div>
+              <div class="ocard-role">↳ Campo + Político</div>
+            </div>
+            <div class="ocard" id="oc-opt2" onclick="toggleOpt('opt2')">
+              <div class="ocard-mark">SELECCIONADA</div>
+              <div class="ocard-num">B</div>
+              <div class="ocard-title">Análisis de Microchips</div>
+              <div class="ocard-desc">Examinar los fragmentos de silicio y titanio para descubrir qué almacenaban.</div>
+              <div class="ocard-role">↳ Explosivos + Hacker</div>
+            </div>
+            <div class="ocard" id="oc-opt3" onclick="toggleOpt('opt3')">
+              <div class="ocard-mark">SELECCIONADA</div>
+              <div class="ocard-num">C</div>
+              <div class="ocard-title">Rastreo del Comprador</div>
+              <div class="ocard-desc">Cámaras de seguridad del concesionario: ¿quién retiró físicamente la furgoneta?</div>
+              <div class="ocard-role">↳ Hacker + Campo</div>
+            </div>
+            <div class="ocard" id="oc-opt4" onclick="toggleOpt('opt4')">
+              <div class="ocard-mark">SELECCIONADA</div>
+              <div class="ocard-num">D</div>
+              <div class="ocard-title">Investigar La Falange Gris</div>
+              <div class="ocard-desc">Rastrear el origen del video terrorista: ¿es real o una cortina de humo?</div>
+              <div class="ocard-role">↳ Perfilador + Hacker</div>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-p" id="a2-btn" onclick="goAct2Reveal()" disabled>Investigar → Revelar Resultados</button>
+            <span class="btn-hint" id="a2-hint">Selecciona exactamente 2 opciones</span>
+          </div>
+        </section>
+
+        <!-- PHASE: ACT II REVEAL -->
+        <section class="phase" id="phase-act2reveal">
+          <div class="eyebrow">Acto II · Resultados de la Investigación</div>
+          <h1 class="ph-title">Informes del Campo</h1>
+          <p class="ph-sub">Los agentes regresan con hallazgos críticos. Lean con atención — cada dato importa para la decisión final.</p>
+          <div class="res-card" id="res-opt1">
+            <div class="res-hdr"><div class="res-title">Allanamiento a Aether Corp · Informe de Campo</div><span class="stamp gr" style="font-size:9px">RECIBIDO</span></div>
+            <div class="res-body"><ul class="res-findings">
+              <li class="res-finding"><span>Los directivos niegan toda relación con Vanguard Solutions.</span></li>
+              <li class="res-finding"><span>Señalan a un ex-empleado: <strong>Marcus Thorne</strong>, ex-jefe de seguridad tecnológica.</span></li>
+              <li class="res-finding"><span>Thorne fue despedido hace un mes, acusado de <strong>robar prototipos</strong>.</span></li>
+              <li class="res-finding"><span>Declaraciones de los directivos presentan <strong>inconsistencias temporales</strong> detectables.</span></li>
+            </ul></div>
+          </div>
+          <div class="res-card" id="res-opt2">
+            <div class="res-hdr"><div class="res-title">Análisis de Microchips · Informe Técnico</div><span class="stamp gr" style="font-size:9px">RECIBIDO</span></div>
+            <div class="res-body"><ul class="res-findings">
+              <li class="res-finding"><span>Los chips pertenecen a un prototipo de almacenamiento cuántico: <strong>Proyecto Ícaro</strong>.</span></li>
+              <li class="res-finding"><span>Capacidad: vaciar servidores bancarios o de inteligencia estatal <strong>en segundos</strong>.</span></li>
+              <li class="res-finding"><span>El explosivo fue diseñado para <strong>destruir el prototipo</strong>, no simplemente matar.</span></li>
+              <li class="res-finding"><span>La ingeniería apunta a una <strong>operación de eliminación de evidencia</strong>.</span></li>
+            </ul></div>
+          </div>
+          <div class="res-card" id="res-opt3">
+            <div class="res-hdr"><div class="res-title">Rastreo del Comprador · Informe de Vigilancia</div><span class="stamp gr" style="font-size:9px">RECIBIDO</span></div>
+            <div class="res-body"><ul class="res-findings">
+              <li class="res-finding"><span>El comprador <strong>no es Marcus Thorne</strong>. Usó documentos de identidad falsificados.</span></li>
+              <li class="res-finding"><span>Análisis biométrico vincula al sujeto con <strong>Blackwood Security</strong>, firma de mercenarios privados.</span></li>
+              <li class="res-finding"><span>Blackwood Security opera como contratista de élite. Sus clientes son corporaciones y gobiernos.</span></li>
+              <li class="res-finding"><span>El pago de la furgoneta se realizó <strong>48 horas antes del atentado</strong>.</span></li>
+            </ul></div>
+          </div>
+          <div class="res-card" id="res-opt4">
+            <div class="res-hdr"><div class="res-title">Investigación La Falange Gris · Informe de Inteligencia</div><span class="stamp gr" style="font-size:9px">RECIBIDO</span></div>
+            <div class="res-body"><ul class="res-findings">
+              <li class="res-finding"><span><strong>¡ALERTA CRÍTICA!</strong> "La Falange Gris" es una organización <strong>ficticia y fabricada</strong>.</span></li>
+              <li class="res-finding"><span>El video reivindicativo fue renderizado con IA y subido desde una IP de <strong>Aether Corp</strong>.</span></li>
+              <li class="res-finding"><span>Los servidores utilizados pertenecen a las oficinas secundarias de la empresa en el Distrito Norte.</span></li>
+              <li class="res-finding"><span>El atentado fue una <strong>OPERACIÓN DE FALSA BANDERA</strong> orquestada por la propia corporación.</span></li>
+            </ul></div>
+          </div>
+          <div class="divider"></div>
+          <div class="doc" data-label="Análisis Combinado · Jefe de Operaciones">
+            <p class="doc-txt">Las pistas apuntan a una <strong>operación corporativa</strong> que usa a <strong>mercenarios</strong> como escudo. La cúpula de Aether Corp ya sabe que la investigación los está cercando. Tienen un plan de fuga. <strong>Hay una sola oportunidad.</strong></p>
+          </div>
+          <div class="btn-row"><button class="btn btn-p" onclick="goAct3()">Avanzar al Acto Final → Decisión Crítica</button></div>
+        </section>
+
+        <!-- PHASE: ACT III -->
+        <section class="phase" id="phase-act3">
+          <div class="eyebrow">Acto III · Decisión Final</div>
+          <h1 class="ph-title">La Última Oportunidad</h1>
+          <p class="ph-sub">La cúpula de Aether Corp activa su plan de escape. Los servidores se van a borrar. El CEO tiene un vuelo privado. <strong>Una sola jugada.</strong></p>
+          <div class="opts-grid">
+            <div class="ocard" id="fc-final1" onclick="setFinal('final1')">
+              <div class="ocard-mark">ELEGIDA</div>
+              <div class="ocard-num">I</div>
+              <div class="ocard-title">Asalto Táctico Directo</div>
+              <div class="ocard-desc">Redada policial masiva e inmediata en la mansión del CEO. Rápido pero expuesto a tecnicismos legales.</div>
+              <div class="ocard-role">↳ Jefe + Campo + Político</div>
+              <div class="riskbar" data-risk="2"><div class="rseg"></div><div class="rseg"></div><div class="rseg"></div></div>
+              <div class="risklbl">Riesgo: Medio</div>
+            </div>
+            <div class="ocard" id="fc-final2" onclick="setFinal('final2')">
+              <div class="ocard-mark">ELEGIDA</div>
+              <div class="ocard-num">II</div>
+              <div class="ocard-title">Trampa Financiera y Digital</div>
+              <div class="ocard-desc">Congelar fondos offshore de Vanguard Solutions y bloquear servidores de Aether Corp en vivo.</div>
+              <div class="ocard-role">↳ Hacker + Financiero + Político</div>
+              <div class="riskbar" data-risk="1"><div class="rseg"></div><div class="rseg"></div><div class="rseg"></div></div>
+              <div class="risklbl">Riesgo: Bajo</div>
+            </div>
+            <div class="ocard" id="fc-final3" onclick="setFinal('final3')">
+              <div class="ocard-mark">ELEGIDA</div>
+              <div class="ocard-num">III</div>
+              <div class="ocard-title">Operación Encubierta: Intercepción</div>
+              <div class="ocard-desc">Interceptar al CEO en su ruta de escape al aeropuerto privado antes de que vuele a un país sin extradición.</div>
+              <div class="ocard-role">↳ Campo + Perfilador + Jefe</div>
+              <div class="riskbar" data-risk="3"><div class="rseg"></div><div class="rseg"></div><div class="rseg"></div></div>
+              <div class="risklbl">Riesgo: Alto</div>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-d" id="exec-btn" onclick="executeOperation()" disabled>&#9889; Ejecutar Operación</button>
+            <span class="btn-hint" id="exec-hint">Seleccionen una táctica para continuar</span>
+          </div>
+        </section>
+
+        <!-- PHASE: OUTCOME -->
+        <section class="phase" id="phase-outcome">
+          <div class="out-card" id="out-victoria">
+            <div class="out-hero">
+              <span class="stamp gr" style="font-size:11px;margin-bottom:20px;display:inline-block">RESOLUCIÓN DEL CASO</span>
+              <div class="out-verdict v">VICTORIA COMPLETA</div>
+              <h2 style="font-family:'Oswald',sans-serif;font-size:22px;font-weight:600;color:var(--tx);margin-bottom:12px">Caso Resuelto. La Verdad Prevalece.</h2>
+              <p class="out-sub">Descubrieron la falsa bandera corporativa y ejecutaron la estrategia correcta. La cúpula de Aether Corp fue detenida. Los mercenarios de Blackwood Security fueron desarticulados. Elena Vance y las quince víctimas tienen justicia. El Proyecto Ícaro fue incautado por el Estado.</p>
+            </div>
+          </div>
+          <div class="out-card" id="out-parcial">
+            <div class="out-hero">
+              <span class="stamp gold" style="font-size:11px;margin-bottom:20px;display:inline-block">RESOLUCIÓN DEL CASO</span>
+              <div class="out-verdict p">VICTORIA PARCIAL</div>
+              <h2 style="font-family:'Oswald',sans-serif;font-size:22px;font-weight:600;color:var(--tx);margin-bottom:12px">Algunos Culpables. Uno se Escapa.</h2>
+              <p class="out-sub">Lograron arrestar a los ejecutores y a los directivos menores de Aether Corp. Sin embargo, el CEO principal logró abordar su vuelo privado hacia un país sin tratado de extradición. La justicia llegó a medias.</p>
+            </div>
+          </div>
+          <div class="out-card" id="out-derrota">
+            <div class="out-hero">
+              <span class="stamp" style="font-size:11px;margin-bottom:20px;display:inline-block">RESOLUCIÓN DEL CASO</span>
+              <div class="out-verdict d">DERROTA</div>
+              <h2 style="font-family:'Oswald',sans-serif;font-size:22px;font-weight:600;color:var(--tx);margin-bottom:12px">Las Pruebas se Evaporaron.</h2>
+              <p class="out-sub">Sin las evidencias clave o con una táctica equivocada, los responsables destruyeron los servidores y desaparecieron. El caso se archivará como un atentado terrorista irresoluble de "La Falange Gris". Los culpables siguen libres.</p>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="doc" data-label="Expediente · Resumen de Decisiones">
+            <p class="doc-txt" id="recap-txt">—</p>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-p" onclick="resetGame()">&#8635; Nueva Investigación</button>
+            <button class="btn btn-s" onclick="setPhase('act2reveal')">&#8592; Revisar Acto II</button>
+          </div>
+        </section>
+
+      </div><!-- .ci -->
+    </main>
+  </div><!-- #layout -->
+</div><!-- #app -->
+</div><!-- #game -->
+
+<div id="toasts"></div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+window.__SUPA__ = createClient(
+  'https://tlsgvpmrcjimipfihemc.supabase.co',
+  'sb_publishable_syX3Xhupx4fEm-7zmCYJbA_FMNRxqIn'
+);
+</script>
+<script>
+var timerInterval = null;
+var ROOM_CODE = null;
+var IS_APPLYING = false;
+var SYNC_TIMER = null;
+var CHANNEL = null;
+
+/* ── SUPABASE SYNC LAYER ── */
+function _sb(){ return window.__SUPA__; }
+
+function _collectState(){
+  var g = document.getElementById('game');
+  var roles = {};
+  document.querySelectorAll('.rinput').forEach(function(i){
+    var id = i.id.replace(/^inp-/, '');
+    if (i.value) roles[id] = i.value;
+  });
+  return {
+    phase: g.dataset.phase || '',
+    act2choices: g.dataset.act2choices || '',
+    finalchoice: g.dataset.finalchoice || '',
+    outcome: g.dataset.outcome || '',
+    starttime: g.dataset.starttime || '',
+    roles: roles,
+    started: document.getElementById('app').classList.contains('active')
+  };
+}
+
+function _applyState(s){
+  if (!s) return;
+  IS_APPLYING = true;
+  try {
+    var g = document.getElementById('game');
+    g.dataset.act2choices = s.act2choices || '';
+    g.dataset.finalchoice = s.finalchoice || '';
+    g.dataset.outcome = s.outcome || '';
+    g.dataset.starttime = s.starttime || '';
+    // roles
+    var roleIds = ['jefe','explosivos','hacker','perfilador','campo','financiero','forense','politico'];
+    roleIds.forEach(function(id){
+      var name = (s.roles && s.roles[id]) || '';
+      var inp = document.getElementById('inp-'+id);
+      var rb = document.getElementById('rb-'+id);
+      var rc = document.getElementById('rc-'+id);
+      if (inp && inp.value !== name) inp.value = name;
+      if (rb) rb.textContent = name || '—';
+      if (rc) rc.className = 'rcard' + (name ? ' assigned' : '');
+    });
+    // hint
+    var assigned = document.querySelectorAll('.rcard.assigned').length;
+    var hint = document.getElementById('role-hint');
+    if (hint) hint.textContent = assigned === 0 ? 'Asigna al menos un agente para continuar' : assigned < 8 ? assigned + '/8 agentes asignados' : 'Equipo completo — listos para iniciar';
+    // app shell
+    if (s.started) {
+      document.getElementById('intro').classList.add('gone');
+      document.getElementById('app').classList.add('active');
+    }
+    // phase
+    setPhase(s.phase || '');
+    // act2 counter
+    var choices = getAct2Choices();
+    var selCnt = document.getElementById('sel-cnt');
+    if (selCnt) selCnt.textContent = choices.length;
+    var a2 = document.getElementById('a2-btn');
+    if (a2) a2.disabled = choices.length < 2;
+    var a2h = document.getElementById('a2-hint');
+    if (a2h) a2h.textContent = choices.length < 2 ? 'Selecciona exactamente 2 opciones' : '¡El equipo ha decidido — procedan!';
+    // final button
+    var exec = document.getElementById('exec-btn');
+    if (exec) exec.disabled = !s.finalchoice;
+    var eh = document.getElementById('exec-hint');
+    if (eh) eh.textContent = s.finalchoice ? 'Confirmen con el equipo antes de ejecutar' : 'Seleccionen una táctica para continuar';
+    // recap
+    if (s.outcome) {
+      var optLabels = {opt1:'Allanamiento Aether Corp', opt2:'Análisis Microchips', opt3:'Rastreo Comprador', opt4:'Investigar Falange Gris'};
+      var finLabels = {final1:'Asalto Táctico Directo', final2:'Trampa Financiera y Digital', final3:'Operación Encubierta'};
+      var rt = document.getElementById('recap-txt');
+      if (rt) rt.innerHTML = '<strong>Líneas:</strong> ' + choices.map(function(c){return optLabels[c]||c;}).join(' · ') + '<br><strong>Táctica:</strong> ' + (finLabels[s.finalchoice]||s.finalchoice||'—');
+    }
+    // timer
+    if (s.starttime) { if (!timerInterval) startTimer(); }
+    else { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } var cd = document.getElementById('countdown'); if (cd){cd.textContent='48:00:00';cd.classList.remove('urgent');} }
+  } finally { IS_APPLYING = false; }
+}
+
+function syncState(){
+  if (IS_APPLYING || !ROOM_CODE) return;
+  if (SYNC_TIMER) clearTimeout(SYNC_TIMER);
+  SYNC_TIMER = setTimeout(function(){
+    var state = _collectState();
+    _sb().from('game_rooms').update({state: state, updated_at: new Date().toISOString()}).eq('code', ROOM_CODE)
+      .then(function(r){ if (r.error) console.error('sync', r.error); });
+  }, 120);
+}
+
+function _randomCode(){
+  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  var s = '';
+  for (var i=0;i<4;i++) s += chars.charAt(Math.floor(Math.random()*chars.length));
+  return s;
+}
+
+function _setStatus(msg, cls){
+  var el = document.getElementById('lb-status');
+  if (!el) return;
+  el.textContent = msg || '';
+  el.className = 'lb-status' + (cls?' '+cls:'');
+}
+
+function _enterRoom(code){
+  ROOM_CODE = code;
+  document.getElementById('room-code-badge').textContent = code;
+  document.getElementById('room-badge').style.display = 'block';
+  document.getElementById('lobby').classList.add('gone');
+  setTimeout(function(){ var l = document.getElementById('lobby'); if (l) l.style.display='none'; }, 500);
+  try {
+    var url = new URL(window.location.href);
+    url.searchParams.set('room', code);
+    window.history.replaceState({}, '', url.toString());
+  } catch(e){}
+  // Subscribe to changes
+  if (CHANNEL) _sb().removeChannel(CHANNEL);
+  CHANNEL = _sb().channel('room:'+code)
+    .on('postgres_changes', {event:'*', schema:'public', table:'game_rooms', filter:'code=eq.'+code},
+        function(payload){ if (payload.new && payload.new.state) _applyState(payload.new.state); })
+    .subscribe();
+}
+
+async function createRoom(){
+  _setStatus('Creando sala…');
+  var code = _randomCode();
+  var initial = {phase:'', act2choices:'', finalchoice:'', outcome:'', starttime:'', roles:{}, started:false};
+  var r = await _sb().from('game_rooms').insert({code:code, state:initial}).select().single();
+  if (r.error) {
+    if (r.error.code === '23505') return createRoom(); // dup, retry
+    _setStatus('Error: '+r.error.message, 'err');
+    return;
+  }
+  _setStatus('Sala '+code+' creada ✓', 'ok');
+  _enterRoom(code);
+  _applyState(initial);
+}
+
+async function joinRoom(){
+  var code = (document.getElementById('join-code').value||'').trim().toUpperCase();
+  if (code.length !== 4) { _setStatus('El código debe tener 4 caracteres', 'err'); return; }
+  _setStatus('Buscando sala…');
+  var r = await _sb().from('game_rooms').select('state').eq('code', code).single();
+  if (r.error || !r.data) { _setStatus('Sala no encontrada', 'err'); return; }
+  _setStatus('Conectado ✓', 'ok');
+  _enterRoom(code);
+  _applyState(r.data.state);
+}
+
+window.createRoom = createRoom;
+window.joinRoom = joinRoom;
+
+/* ── PHASE NAVIGATION ── */
+function setPhase(p) {
+  var g = document.getElementById('game');
+  g.dataset.phase = p;
+  var labels = {roles:'Asignación',act1:'Acto I',act2:'Acto II',act2reveal:'Acto II · Resultados',act3:'Acto III',outcome:'Desenlace'};
+  var pb = document.getElementById('phase-badge');
+  pb.textContent = labels[p] || '—';
+  pb.className = 'tb-phase' + (p && p !== 'roles' ? ' live' : '');
+}
+
+function startGame() {
+  document.getElementById('intro').classList.add('gone');
+  document.getElementById('app').classList.add('active');
+  setPhase('roles');
+  syncState();
+}
+
+function goAct1() {
+  var inputs = document.querySelectorAll('.rinput');
+  var hasAny = false;
+  inputs.forEach(function(i){ if(i.value.trim()) hasAny = true; });
+  if (!hasAny) { toast('Asigna al menos un agente antes de continuar.', 'err'); return; }
+  var g = document.getElementById('game');
+  if (!g.dataset.starttime) g.dataset.starttime = Date.now().toString();
+  startTimer();
+  setPhase('act1');
+  syncState();
+}
+
+function goAct2() { setPhase('act2'); syncState(); }
+function goAct3() { setPhase('act3'); syncState(); }
+
+function goAct2Reveal() {
+  var choices = getAct2Choices();
+  if (choices.length < 2) return;
+  setPhase('act2reveal');
+  syncState();
+}
+
+function executeOperation() {
+  var g = document.getElementById('game');
+  if (!g.dataset.finalchoice) return;
+  var choices = getAct2Choices();
+  var final = g.dataset.finalchoice;
+  var smart = final === 'final2' || final === 'final3';
+  var hasOpt4 = choices.indexOf('opt4') >= 0;
+  var hasOpt2or3 = choices.indexOf('opt2') >= 0 || choices.indexOf('opt3') >= 0;
+  var outcome = hasOpt4 && smart ? 'victoria' : (hasOpt4 || (hasOpt2or3 && smart)) ? 'parcial' : 'derrota';
+  g.dataset.outcome = outcome;
+  // Build recap
+  var optLabels = {opt1:'Allanamiento Aether Corp', opt2:'Análisis Microchips', opt3:'Rastreo Comprador', opt4:'Investigar Falange Gris'};
+  var finLabels = {final1:'Asalto Táctico Directo', final2:'Trampa Financiera y Digital', final3:'Operación Encubierta'};
+  document.getElementById('recap-txt').innerHTML =
+    '<strong>Líneas:</strong> ' + choices.map(function(c){return optLabels[c]||c;}).join(' · ') +
+    '<br><strong>Táctica:</strong> ' + (finLabels[final]||final);
+  setPhase('outcome');
+  syncState();
+}
+
+function resetGame() {
+  if (!confirm('¿Reiniciar investigación? Se perderá todo el progreso.')) return;
+  var g = document.getElementById('game');
+  g.dataset.act2choices = '';
+  g.dataset.finalchoice = '';
+  g.dataset.outcome = '';
+  g.dataset.starttime = '';
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  document.getElementById('countdown').textContent = '48:00:00';
+  document.getElementById('countdown').classList.remove('urgent');
+  // Clear role inputs and roster
+  document.querySelectorAll('.rinput').forEach(function(i){ i.value = ''; });
+  document.querySelectorAll('.rbadge-player').forEach(function(el){ el.textContent = '—'; });
+  document.querySelectorAll('.rcard').forEach(function(c){ c.classList.remove('assigned'); });
+  // Reset sel counter
+  document.getElementById('sel-cnt').textContent = '0';
+  document.getElementById('a2-btn').disabled = true;
+  document.getElementById('exec-btn').disabled = true;
+  setPhase('roles');
+  syncState();
+}
+
+/* ── ROLES ── */
+function setRole(roleId, input) {
+  var val = input.value.trim();
+  var rb = document.getElementById('rb-' + roleId);
+  if (rb) rb.textContent = val || '—';
+  var rc = document.getElementById('rc-' + roleId);
+  if (rc) rc.className = 'rcard' + (val ? ' assigned' : '');
+  // Update hint
+  var assigned = document.querySelectorAll('.rcard.assigned').length;
+  var hint = document.getElementById('role-hint');
+  if (hint) hint.textContent = assigned === 0 ? 'Asigna al menos un agente para continuar' : assigned < 8 ? assigned + '/8 agentes asignados' : 'Equipo completo — listos para iniciar';
+  syncState();
+}
+
+/* ── ACT2 SELECTION ── */
+function getAct2Choices() {
+  var v = document.getElementById('game').dataset.act2choices;
+  return v ? v.split(',').filter(Boolean) : [];
+}
+
+function toggleOpt(id) {
+  var choices = getAct2Choices();
+  var idx = choices.indexOf(id);
+  if (idx >= 0) {
+    choices.splice(idx, 1);
+  } else if (choices.length < 2) {
+    choices.push(id);
+  } else {
+    toast('Ya seleccionaste 2 opciones. Deselecciona una primero.', 'err'); return;
+  }
+  document.getElementById('game').dataset.act2choices = choices.join(',');
+  var cnt = choices.length;
+  document.getElementById('sel-cnt').textContent = cnt;
+  var btn = document.getElementById('a2-btn');
+  btn.disabled = cnt < 2;
+  document.getElementById('a2-hint').textContent = cnt < 2 ? 'Selecciona exactamente 2 opciones' : '¡El equipo ha decidido — procedan!';
+  syncState();
+}
+
+/* ── ACT3 SELECTION ── */
+function setFinal(id) {
+  var g = document.getElementById('game');
+  g.dataset.finalchoice = g.dataset.finalchoice === id ? '' : id;
+  var btn = document.getElementById('exec-btn');
+  btn.disabled = !g.dataset.finalchoice;
+  document.getElementById('exec-hint').textContent = g.dataset.finalchoice ? 'Confirmen con el equipo antes de ejecutar' : 'Seleccionen una táctica para continuar';
+  syncState();
+}
+
+/* ── TIMER ── */
+function startTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(updateTimer, 1000);
+  updateTimer();
+}
+function updateTimer() {
+  var st = parseInt(document.getElementById('game').dataset.starttime || '0');
+  if (!st) return;
+  var el = document.getElementById('countdown');
+  var remaining = Math.max(0, 48*3600000 - (Date.now() - st));
+  var h = Math.floor(remaining/3600000);
+  var m = Math.floor((remaining%3600000)/60000);
+  var s = Math.floor((remaining%60000)/1000);
+  el.textContent = (h<10?'0':'')+h+':'+(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+  if (h < 6) el.classList.add('urgent'); else el.classList.remove('urgent');
+}
+
+/* ── TOAST ── */
+function toast(msg, type) {
+  var c = document.getElementById('toasts');
+  var t = document.createElement('div');
+  t.className = 'toast' + (type ? ' '+type : '');
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 4000);
+}
+
+/* ── INIT: auto-join room from URL param ── */
+(function(){
+  function tryAutoJoin(){
+    try {
+      var url = new URL(window.location.href);
+      var code = (url.searchParams.get('room') || '').toUpperCase();
+      if (code && code.length === 4) {
+        var inp = document.getElementById('join-code');
+        if (inp) inp.value = code;
+        joinRoom();
+      }
+    } catch(e){}
+  }
+  if (window.__SUPA__) tryAutoJoin();
+  else {
+    var tries = 0;
+    var iv = setInterval(function(){
+      tries++;
+      if (window.__SUPA__) { clearInterval(iv); tryAutoJoin(); }
+      else if (tries > 40) clearInterval(iv);
+    }, 100);
+  }
+})();
+</script>
