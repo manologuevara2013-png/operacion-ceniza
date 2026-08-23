@@ -74,6 +74,9 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
 .phase{display:none}
 #game[data-phase="roles"] #phase-roles{display:block}
 #game[data-phase="act1"] #phase-act1{display:block}
+#game[data-phase="testimonios"] #phase-testimonios{display:block}
+#game[data-phase="evidencia"] #phase-evidencia{display:block}
+#game[data-phase="expediente"] #phase-expediente{display:block}
 #game[data-phase="act2"] #phase-act2{display:block}
 #game[data-phase="act2reveal"] #phase-act2reveal{display:block}
 #game[data-phase="act3"] #phase-act3{display:block}
@@ -225,9 +228,71 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 .lb-status{font-family:'Courier Prime',monospace;font-size:11px;color:var(--tx2);text-align:center;margin-top:12px;min-height:16px}
 .lb-status.err{color:var(--red)}
 .lb-status.ok{color:var(--green)}
-.room-badge{position:fixed;top:6px;right:12px;font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:.2em;color:var(--gold);z-index:50;background:var(--surface);padding:3px 10px;border:1px solid var(--bd)}
+.room-badge{position:fixed;top:6px;right:12px;font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:.2em;color:var(--gold);z-index:50;background:var(--surface);padding:3px 10px;border:1px solid var(--bd);display:flex;gap:12px;align-items:center}
+.room-badge .rb-players{color:var(--tx2);border-left:1px solid var(--bd2);padding-left:12px}
+
+/* Vote system */
+.vote-row{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--bd2)}
+.vote-btn{background:transparent;border:1px solid var(--bd);color:var(--tx2);font-family:'Oswald',sans-serif;font-size:10px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;padding:5px 10px;cursor:pointer;transition:all .15s}
+.vote-btn:hover{border-color:var(--gold);color:var(--gold)}
+.vote-btn.voted{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+.vote-count{font-family:'Courier Prime',monospace;font-size:11px;color:var(--tx2);flex:1}
+.vote-count strong{color:var(--gold);font-size:14px}
+.vote-bar{flex:1;height:4px;background:var(--bd2);position:relative;overflow:hidden}
+.vote-bar-fill{position:absolute;top:0;left:0;height:100%;background:var(--gold);transition:width .3s}
+.vote-winner{position:absolute;top:8px;right:8px;background:var(--green);color:var(--bg);font-family:'Oswald',sans-serif;font-size:9px;font-weight:700;letter-spacing:.15em;padding:2px 7px;text-transform:uppercase;display:none}
+.ocard.winner .vote-winner{display:block}
+.ocard.winner{border-color:var(--green)!important;box-shadow:0 0 0 1px var(--green)}
+
+/* Player name input */
+.name-row{display:flex;gap:8px;margin-top:10px;justify-content:center}
+.name-input{padding:6px 10px;background:var(--s2);border:1px solid var(--bd);color:var(--tx);font-family:'Courier Prime',monospace;font-size:12px;width:200px}
+
+/* Testimonies phase */
+.witness-card{border:1px solid var(--bd);background:var(--s2);padding:18px 22px;margin-bottom:16px;position:relative}
+.witness-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:10px;border-bottom:1px dashed var(--bd2)}
+.witness-name{font-family:'Oswald',sans-serif;font-size:14px;font-weight:700;letter-spacing:.08em;color:var(--tx);text-transform:uppercase}
+.witness-role{font-family:'Courier Prime',monospace;font-size:10px;color:var(--tx3);letter-spacing:.15em;text-transform:uppercase}
+.witness-quote{font-family:'Courier Prime',monospace;font-size:13px;line-height:1.65;color:var(--tx2);font-style:italic;padding-left:14px;border-left:3px solid var(--gold)}
+.witness-quote strong{color:var(--tx);font-style:normal}
+.witness-tag{display:inline-block;font-family:'Oswald',sans-serif;font-size:9px;font-weight:700;letter-spacing:.2em;color:var(--red);border:1px solid var(--red);padding:2px 7px;margin-top:10px;text-transform:uppercase}
+
+/* Notes / deliberation */
+.notes-area{width:100%;min-height:100px;padding:14px;background:var(--s2);border:1px solid var(--bd);color:var(--tx);font-family:'Courier Prime',monospace;font-size:13px;line-height:1.6;resize:vertical;margin-bottom:16px}
+.notes-area:focus{outline:2px solid var(--gold);outline-offset:2px}
+.notes-lbl{font-family:'Oswald',sans-serif;font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--tx3);margin-bottom:8px}
 .sync-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:6px;vertical-align:middle;animation:sync-p 2s ease-in-out infinite}
 @keyframes sync-p{0%,100%{opacity:.4}50%{opacity:1}}
+
+/* Random role assignment */
+.role-me{position:sticky;top:0;background:var(--gold);color:var(--bg);padding:14px 20px;margin:-32px -40px 24px;font-family:'Oswald',sans-serif;font-size:14px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;text-align:center;z-index:5;box-shadow:0 2px 8px var(--sh)}
+.role-me small{display:block;font-size:10px;letter-spacing:.2em;opacity:.85;margin-top:2px;font-weight:600}
+.assign-btn-row{display:flex;gap:12px;margin-bottom:20px}
+#game[data-phase="evidencia"] #phase-evidencia{display:block}
+#game[data-phase="expediente"] #phase-expediente{display:block}
+.evc{border:1px solid var(--bd);background:var(--s2);padding:16px 20px;margin-bottom:14px;position:relative}
+.evc.mine{border-color:var(--gold);border-left-width:4px}
+.evc.shared{border-color:var(--green);background:var(--greenbg)}
+.evc-owner{font-family:'Courier Prime',monospace;font-size:10px;color:var(--tx3);letter-spacing:.15em;text-transform:uppercase;margin-bottom:6px}
+.evc-owner strong{color:var(--gold)}
+.evc-tag{font-family:'Oswald',sans-serif;font-size:11px;font-weight:700;letter-spacing:.15em;color:var(--red);text-transform:uppercase;margin-bottom:6px}
+.evc-text{font-family:'Courier Prime',monospace;font-size:13px;line-height:1.6;color:var(--tx2);margin-bottom:10px}
+.evc-actions{display:flex;gap:8px;align-items:center;padding-top:10px;border-top:1px dashed var(--bd2)}
+.share-btn{background:var(--gold);color:var(--bg);border:none;font-family:'Oswald',sans-serif;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:6px 12px;cursor:pointer}
+.share-btn.shared{background:var(--green)}
+.share-btn:disabled{background:var(--bd);color:var(--tx3);cursor:not-allowed}
+.role-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--bd)}
+.role-filter button{background:transparent;border:1px solid var(--bd);color:var(--tx2);font-family:'DM Sans',sans-serif;font-size:11px;padding:5px 10px;cursor:pointer;letter-spacing:.05em}
+.role-filter button.active{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+.role-filter button.mine{border-color:var(--gold);color:var(--gold);font-weight:600}
+.role-filter button.mine.active{background:var(--gold);color:var(--bg)}
+.expediente-item{border-left:3px solid var(--green);background:var(--greenbg);padding:12px 16px;margin-bottom:10px}
+.expediente-item .evc-tag{color:var(--green)}
+.tally-row{display:flex;gap:8px;align-items:center;padding:8px 0;font-family:'Courier Prime',monospace;font-size:12px}
+.tally-row .tr-lbl{color:var(--tx2);flex:1}
+.tally-row .tr-yes{color:var(--green);font-weight:700}
+.tally-row .tr-no{color:var(--red)}
+
 </style>
 
 <!-- ── LOBBY (room create / join) ── -->
@@ -235,6 +300,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
   <div class="lb-brand">CASO #CEN-2024-0815 · CLASIFICADO</div>
   <h1 class="lb-title">Operación<br>Ceniza</h1>
   <p class="lb-sub">Multijugador en tiempo real. Un jugador crea una sala, los demás se unen con el código.</p>
+
+  <div class="lb-panel">
+    <div class="lb-lbl">Tu nombre (para votaciones)</div>
+    <input class="lb-input" id="player-name" maxlength="20" placeholder="AGENTE" style="letter-spacing:.15em;font-size:16px" autocomplete="off">
+  </div>
 
   <div class="lb-panel">
     <div class="lb-lbl">Crear nueva investigación</div>
@@ -252,7 +322,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
   <div class="lb-status" id="lb-status"></div>
 </div>
 
-<div id="room-badge" class="room-badge" style="display:none"><span class="sync-dot"></span>SALA <span id="room-code-badge">—</span></div>
+<div id="room-badge" class="room-badge" style="display:none"><span><span class="sync-dot"></span>SALA <span id="room-code-badge">—</span></span><span class="rb-players"><span id="rb-player-count">1</span> JUGADOR<span id="rb-player-plural"></span></span></div>
 
 <div id="game" data-phase="" data-act2choices="" data-finalchoice="" data-outcome="" data-starttime="">
 
@@ -315,6 +385,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 
         <!-- PHASE: ROLES -->
         <section class="phase" id="phase-roles">
+          <div class="role-me" id="role-me-roles" style="display:none">— Sin rol asignado —<small>Presiona "Asignar aleatoriamente" cuando todos hayan entrado</small></div>
           <div class="eyebrow">Asignación · Equipo de Investigación</div>
           <h1 class="ph-title">Designación de Agentes</h1>
           <p class="ph-sub">El Jefe de Operaciones coordina la asignación. Los nombres aparecen en tiempo real para todos.</p>
@@ -373,6 +444,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
             <p class="doc-txt">Ayer a las 08:15 AM, un coche bomba explotó en el andén principal de la <strong>Estación Central</strong>. Quince muertos. Entre las víctimas: <strong>Elena Vance</strong>, ingeniera de <strong>Aether Corp</strong>. El grupo <strong>"La Falange Gris"</strong> reivindicó el ataque. La ciudad exige respuestas. Tienen 48 horas.</p>
           </div>
           <div class="btn-row">
+            <button class="btn btn-s" onclick="assignRolesRandom()">🎲 Asignar Roles Aleatoriamente</button>
             <button class="btn btn-p" onclick="goAct1()">Abrir Expediente · Acto I →</button>
             <span class="btn-hint role-hint" id="role-hint">Asigna al menos un agente para continuar</span>
           </div>
@@ -396,7 +468,89 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
             <span class="stamp gr">Acto I completado</span>
           </div>
           <p style="font-family:'Courier Prime',monospace;font-size:12px;color:var(--tx2);margin-bottom:24px">Cuatro evidencias incorporadas al expediente. El rastro apunta a <strong>Aether Corp</strong>. Es hora de profundizar.</p>
-          <div class="btn-row"><button class="btn btn-p" onclick="goAct2()">Avanzar al Acto II →</button></div>
+          <div class="btn-row">
+            <button class="btn btn-s" onclick="goTo('roles')">&#8592; Volver a Roles</button>
+            <button class="btn btn-p" onclick="goTo('testimonios')">Interrogar testigos →</button>
+          </div>
+        </section>
+
+        <!-- PHASE: TESTIMONIOS -->
+        <section class="phase" id="phase-testimonios">
+          <div class="eyebrow">Interludio · Interrogatorios</div>
+          <h1 class="ph-title">Los Testigos Hablan</h1>
+          <p class="ph-sub">Tres testigos claves fueron ubicados en las horas posteriores al atentado. Sus versiones no coinciden. <strong>Presten atención a las contradicciones.</strong></p>
+
+          <div class="witness-card">
+            <div class="witness-header">
+              <div class="witness-name">Marcus Reeve</div>
+              <div class="witness-role">Guardia Estación Central · 47 años</div>
+            </div>
+            <div class="witness-quote">"La furgoneta llegó a las 07:52. El conductor era <strong>un hombre blanco, robusto, con tatuaje militar en el antebrazo</strong> — una calavera con la palabra 'ORDEN'. No parecía nervioso. Descargó una caja pesada y se fue caminando hacia el norte, no hacia el sur como diría cualquiera que quisiera escapar. Como si <strong>supiera que no iba a explotar de inmediato</strong>."</div>
+            <div class="witness-tag">Pista · Tatuaje "ORDEN"</div>
+          </div>
+
+          <div class="witness-card">
+            <div class="witness-header">
+              <div class="witness-name">Dra. Sofía Bellamy</div>
+              <div class="witness-role">Colega de Elena Vance · Aether Corp</div>
+            </div>
+            <div class="witness-quote">"Elena estaba <strong>aterrada</strong> las últimas dos semanas. Descubrió algo en el inventario — <strong>faltaban microchips militares</strong> de un proyecto clasificado con el Ministerio de Defensa. Pidió una auditoría interna. La bloquearon desde arriba. Ella iba a denunciarlo esa misma mañana en la Fiscalía. <strong>Nunca llegó.</strong>"</div>
+            <div class="witness-tag">Pista · Elena era denunciante, no cómplice</div>
+          </div>
+
+          <div class="witness-card">
+            <div class="witness-header">
+              <div class="witness-name">"Corvus" (informante anónimo)</div>
+              <div class="witness-role">Ex-miembro paramilitar</div>
+            </div>
+            <div class="witness-quote">"La 'Falange Gris' no reivindica ataques con nombre y logo. Somos — <strong>éramos</strong> — profesionales. Ese video es <strong>una puesta en escena</strong>. Alguien está usando nuestra reputación como pantalla. Busquen quién <strong>compró</strong> el silencio de nuestros antiguos operativos. Ahí está el que puso la bomba."</div>
+            <div class="witness-tag">Pista · Falange = pantalla; el verdadero autor pagó</div>
+          </div>
+
+          <div class="doc" data-label="Análisis del Perfilador">
+            <p class="doc-txt">Los tres testimonios convergen en un patrón: <strong>Elena Vance era la denunciante</strong>, no la criminal. Alguien con acceso al proyecto militar clasificado <strong>y</strong> con vínculos a exparamilitares organizó el ataque para silenciarla y desviar la investigación hacia Aether Corp. La pregunta clave: <strong>¿quién tenía ambos accesos?</strong></p>
+          </div>
+
+          <div class="notes-lbl">Notas del equipo antes de decidir líneas de investigación</div>
+          <textarea class="notes-area" id="notes-test" oninput="updateNotesT(this.value)" placeholder="¿Qué patrones ven? ¿A quién apuntan las pistas?"></textarea>
+
+          <div class="btn-row">
+            <button class="btn btn-s" onclick="goTo('act1')">&#8592; Volver al Acto I</button>
+            <button class="btn btn-p" onclick="goAct2()">Avanzar al Acto II · Elegir líneas →</button>
+          </div>
+        </section>
+
+
+        <!-- PHASE: EVIDENCIA (each role shares evidence) -->
+        <section class="phase" id="phase-evidencia">
+          <div class="eyebrow">Fase de Inteligencia · Consolidación</div>
+          <h1 class="ph-title">Compartir Pruebas del Equipo</h1>
+          <p class="ph-sub">Cada agente ha recabado pruebas propias según su rol. <strong>Comparte las que consideres relevantes</strong>. Solo puedes compartir las pruebas de <strong>tu rol asignado</strong>. Las pruebas compartidas se someterán a votación del equipo.</p>
+          <div class="role-me" id="role-me-evidencia">— Sin rol asignado —<small>Regresa a la fase de Roles y presiona "Asignar aleatoriamente"</small></div>
+          <div class="role-filter" id="role-filter"></div>
+          <div id="evidence-list"></div>
+          <div class="btn-row">
+            <button class="btn btn-s" onclick="goTo('testimonios')">&#8592; Volver a Testigos</button>
+            <button class="btn btn-p" onclick="goTo('expediente')">Ir a votación del expediente →</button>
+          </div>
+        </section>
+
+        <!-- PHASE: EXPEDIENTE (voting on shared evidence) -->
+        <section class="phase" id="phase-expediente">
+          <div class="eyebrow">Fase de Inteligencia · Votación del Expediente</div>
+          <h1 class="ph-title">Construir el Expediente Compartido</h1>
+          <p class="ph-sub">Vota cada prueba compartida. Las pruebas con <strong>mayoría a favor</strong> se integran al expediente. <strong>Empates: decide el Jefe de Operaciones</strong>.</p>
+          <div id="jefe-tag-line" style="font-family:'Courier Prime',monospace;font-size:11px;color:var(--tx2);margin-bottom:18px;padding:8px 12px;background:var(--surface);border-left:3px solid var(--gold)">Jefe de Operaciones: <strong id="jefe-name">—</strong> (voto de desempate)</div>
+          <div id="voting-list"></div>
+          <div class="divider"></div>
+          <h2 style="font-family:'Oswald',sans-serif;font-size:20px;letter-spacing:.05em;margin-bottom:12px;color:var(--tx)">Expediente Aprobado</h2>
+          <div id="expediente-list" style="min-height:40px;font-family:'Courier Prime',monospace;font-size:12px;color:var(--tx3);font-style:italic">— Aún no hay pruebas aprobadas —</div>
+          <div class="notes-lbl" style="margin-top:20px">Discusión del equipo</div>
+          <textarea class="notes-area" id="notes-exp" oninput="updateNotesExp(this.value)" placeholder="Debatan qué pruebas admitir..."></textarea>
+          <div class="btn-row">
+            <button class="btn btn-s" onclick="goTo('evidencia')">&#8592; Volver a Compartir</button>
+            <button class="btn btn-p" onclick="goAct2()">Avanzar al Acto II · Elegir líneas →</button>
+          </div>
         </section>
 
         <!-- PHASE: ACT II -->
@@ -406,38 +560,69 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
           <p class="ph-sub">El equipo tiene recursos y tiempo limitados. Debatan y elijan exactamente <strong>2 de las 4 líneas de investigación</strong>. El Jefe confirma la elección.</p>
           <div class="sel-ctr">Seleccionadas: <span class="cnt" id="sel-cnt">0</span> / 2</div>
           <div class="opts-grid">
-            <div class="ocard" id="oc-opt1" onclick="toggleOpt('opt1')">
+            <div class="ocard" id="oc-opt1" onclick="castVote('opt1')">
               <div class="ocard-mark">SELECCIONADA</div>
               <div class="ocard-num">A</div>
               <div class="ocard-title">Allanamiento a Aether Corp</div>
               <div class="ocard-desc">Interrogar a los directivos sobre la empresa fantasma Vanguard Solutions.</div>
               <div class="ocard-role">↳ Campo + Político</div>
+              <div class="vote-winner">Ganador</div>
+              <div class="vote-row" onclick="event.stopPropagation()">
+                <button class="vote-btn" id="vb-opt1" onclick="event.stopPropagation();castVote('opt1')">Votar</button>
+                <div class="vote-bar"><div class="vote-bar-fill" id="vf-opt1" style="width:0%"></div></div>
+                <div class="vote-count"><strong id="vc-opt1">0</strong> votos</div>
+              </div>
+              <div class="voters" id="vl-opt1" style="font-family:'Courier Prime',monospace;font-size:10px;color:var(--tx3);margin-top:4px;min-height:14px"></div>
             </div>
-            <div class="ocard" id="oc-opt2" onclick="toggleOpt('opt2')">
+            <div class="ocard" id="oc-opt2" onclick="castVote('opt2')">
               <div class="ocard-mark">SELECCIONADA</div>
               <div class="ocard-num">B</div>
               <div class="ocard-title">Análisis de Microchips</div>
               <div class="ocard-desc">Examinar los fragmentos de silicio y titanio para descubrir qué almacenaban.</div>
               <div class="ocard-role">↳ Explosivos + Hacker</div>
+              <div class="vote-winner">Ganador</div>
+              <div class="vote-row" onclick="event.stopPropagation()">
+                <button class="vote-btn" id="vb-opt2" onclick="event.stopPropagation();castVote('opt2')">Votar</button>
+                <div class="vote-bar"><div class="vote-bar-fill" id="vf-opt2" style="width:0%"></div></div>
+                <div class="vote-count"><strong id="vc-opt2">0</strong> votos</div>
+              </div>
+              <div class="voters" id="vl-opt2" style="font-family:'Courier Prime',monospace;font-size:10px;color:var(--tx3);margin-top:4px;min-height:14px"></div>
             </div>
-            <div class="ocard" id="oc-opt3" onclick="toggleOpt('opt3')">
+            <div class="ocard" id="oc-opt3" onclick="castVote('opt3')">
               <div class="ocard-mark">SELECCIONADA</div>
               <div class="ocard-num">C</div>
               <div class="ocard-title">Rastreo del Comprador</div>
               <div class="ocard-desc">Cámaras de seguridad del concesionario: ¿quién retiró físicamente la furgoneta?</div>
               <div class="ocard-role">↳ Hacker + Campo</div>
+              <div class="vote-winner">Ganador</div>
+              <div class="vote-row" onclick="event.stopPropagation()">
+                <button class="vote-btn" id="vb-opt3" onclick="event.stopPropagation();castVote('opt3')">Votar</button>
+                <div class="vote-bar"><div class="vote-bar-fill" id="vf-opt3" style="width:0%"></div></div>
+                <div class="vote-count"><strong id="vc-opt3">0</strong> votos</div>
+              </div>
+              <div class="voters" id="vl-opt3" style="font-family:'Courier Prime',monospace;font-size:10px;color:var(--tx3);margin-top:4px;min-height:14px"></div>
             </div>
-            <div class="ocard" id="oc-opt4" onclick="toggleOpt('opt4')">
+            <div class="ocard" id="oc-opt4" onclick="castVote('opt4')">
               <div class="ocard-mark">SELECCIONADA</div>
               <div class="ocard-num">D</div>
               <div class="ocard-title">Investigar La Falange Gris</div>
               <div class="ocard-desc">Rastrear el origen del video terrorista: ¿es real o una cortina de humo?</div>
               <div class="ocard-role">↳ Perfilador + Hacker</div>
+              <div class="vote-winner">Ganador</div>
+              <div class="vote-row" onclick="event.stopPropagation()">
+                <button class="vote-btn" id="vb-opt4" onclick="event.stopPropagation();castVote('opt4')">Votar</button>
+                <div class="vote-bar"><div class="vote-bar-fill" id="vf-opt4" style="width:0%"></div></div>
+                <div class="vote-count"><strong id="vc-opt4">0</strong> votos</div>
+              </div>
+              <div class="voters" id="vl-opt4" style="font-family:'Courier Prime',monospace;font-size:10px;color:var(--tx3);margin-top:4px;min-height:14px"></div>
             </div>
           </div>
+          <div class="notes-lbl">Notas del equipo (compartidas en tiempo real)</div>
+          <textarea class="notes-area" id="notes-act2" oninput="updateNotes(this.value)" placeholder="Escriban aquí sus deducciones, sospechas y estrategia..."></textarea>
           <div class="btn-row">
-            <button class="btn btn-p" id="a2-btn" onclick="goAct2Reveal()" disabled>Investigar → Revelar Resultados</button>
-            <span class="btn-hint" id="a2-hint">Selecciona exactamente 2 opciones</span>
+            <button class="btn btn-s" onclick="goTo('act1')">&#8592; Volver al Acto I</button>
+            <button class="btn btn-p" id="a2-btn" onclick="confirmVotesAct2()" disabled>Confirmar votación · Revelar Resultados →</button>
+            <span class="btn-hint" id="a2-hint">Necesitan votos en al menos 2 opciones diferentes</span>
           </div>
         </section>
 
@@ -486,7 +671,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
           <div class="doc" data-label="Análisis Combinado · Jefe de Operaciones">
             <p class="doc-txt">Las pistas apuntan a una <strong>operación corporativa</strong> que usa a <strong>mercenarios</strong> como escudo. La cúpula de Aether Corp ya sabe que la investigación los está cercando. Tienen un plan de fuga. <strong>Hay una sola oportunidad.</strong></p>
           </div>
-          <div class="btn-row"><button class="btn btn-p" onclick="goAct3()">Avanzar al Acto Final → Decisión Crítica</button></div>
+          <div class="btn-row">
+            <button class="btn btn-s" onclick="goTo('act2')">&#8592; Volver a Elegir</button>
+            <button class="btn btn-p" onclick="goAct3()">Avanzar al Acto Final → Decisión Crítica</button>
+          </div>
         </section>
 
         <!-- PHASE: ACT III -->
@@ -495,7 +683,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
           <h1 class="ph-title">La Última Oportunidad</h1>
           <p class="ph-sub">La cúpula de Aether Corp activa su plan de escape. Los servidores se van a borrar. El CEO tiene un vuelo privado. <strong>Una sola jugada.</strong></p>
           <div class="opts-grid">
-            <div class="ocard" id="fc-final1" onclick="setFinal('final1')">
+            <div class="ocard" id="fc-final1" onclick="castVote('final1')">
               <div class="ocard-mark">ELEGIDA</div>
               <div class="ocard-num">I</div>
               <div class="ocard-title">Asalto Táctico Directo</div>
@@ -503,8 +691,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
               <div class="ocard-role">↳ Jefe + Campo + Político</div>
               <div class="riskbar" data-risk="2"><div class="rseg"></div><div class="rseg"></div><div class="rseg"></div></div>
               <div class="risklbl">Riesgo: Medio</div>
+              <div class="vote-winner">Ganador</div>
+              <div class="vote-row" onclick="event.stopPropagation()">
+                <button class="vote-btn" id="vb-final1" onclick="event.stopPropagation();castVote('final1')">Votar</button>
+                <div class="vote-bar"><div class="vote-bar-fill" id="vf-final1" style="width:0%"></div></div>
+                <div class="vote-count"><strong id="vc-final1">0</strong> votos</div>
+              </div>
+              <div class="voters" id="vl-final1" style="font-family:'Courier Prime',monospace;font-size:10px;color:var(--tx3);margin-top:4px;min-height:14px"></div>
             </div>
-            <div class="ocard" id="fc-final2" onclick="setFinal('final2')">
+            <div class="ocard" id="fc-final2" onclick="castVote('final2')">
               <div class="ocard-mark">ELEGIDA</div>
               <div class="ocard-num">II</div>
               <div class="ocard-title">Trampa Financiera y Digital</div>
@@ -512,8 +707,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
               <div class="ocard-role">↳ Hacker + Financiero + Político</div>
               <div class="riskbar" data-risk="1"><div class="rseg"></div><div class="rseg"></div><div class="rseg"></div></div>
               <div class="risklbl">Riesgo: Bajo</div>
+              <div class="vote-winner">Ganador</div>
+              <div class="vote-row" onclick="event.stopPropagation()">
+                <button class="vote-btn" id="vb-final2" onclick="event.stopPropagation();castVote('final2')">Votar</button>
+                <div class="vote-bar"><div class="vote-bar-fill" id="vf-final2" style="width:0%"></div></div>
+                <div class="vote-count"><strong id="vc-final2">0</strong> votos</div>
+              </div>
+              <div class="voters" id="vl-final2" style="font-family:'Courier Prime',monospace;font-size:10px;color:var(--tx3);margin-top:4px;min-height:14px"></div>
             </div>
-            <div class="ocard" id="fc-final3" onclick="setFinal('final3')">
+            <div class="ocard" id="fc-final3" onclick="castVote('final3')">
               <div class="ocard-mark">ELEGIDA</div>
               <div class="ocard-num">III</div>
               <div class="ocard-title">Operación Encubierta: Intercepción</div>
@@ -521,11 +723,21 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
               <div class="ocard-role">↳ Campo + Perfilador + Jefe</div>
               <div class="riskbar" data-risk="3"><div class="rseg"></div><div class="rseg"></div><div class="rseg"></div></div>
               <div class="risklbl">Riesgo: Alto</div>
+              <div class="vote-winner">Ganador</div>
+              <div class="vote-row" onclick="event.stopPropagation()">
+                <button class="vote-btn" id="vb-final3" onclick="event.stopPropagation();castVote('final3')">Votar</button>
+                <div class="vote-bar"><div class="vote-bar-fill" id="vf-final3" style="width:0%"></div></div>
+                <div class="vote-count"><strong id="vc-final3">0</strong> votos</div>
+              </div>
+              <div class="voters" id="vl-final3" style="font-family:'Courier Prime',monospace;font-size:10px;color:var(--tx3);margin-top:4px;min-height:14px"></div>
             </div>
           </div>
+          <div class="notes-lbl">Deliberación final del equipo</div>
+          <textarea class="notes-area" id="notes-act3" oninput="updateNotes3(this.value)" placeholder="Última oportunidad. Discutan la estrategia..."></textarea>
           <div class="btn-row">
-            <button class="btn btn-d" id="exec-btn" onclick="executeOperation()" disabled>&#9889; Ejecutar Operación</button>
-            <span class="btn-hint" id="exec-hint">Seleccionen una táctica para continuar</span>
+            <button class="btn btn-s" onclick="goTo('act2reveal')">&#8592; Volver a Resultados</button>
+            <button class="btn btn-d" id="exec-btn" onclick="confirmVoteAct3()" disabled>&#9889; Ejecutar por Mayoría</button>
+            <span class="btn-hint" id="exec-hint">Necesitan al menos un voto en una táctica</span>
           </div>
         </section>
 
@@ -587,8 +799,25 @@ var IS_APPLYING = false;
 var SYNC_TIMER = null;
 var CHANNEL = null;
 
+/* ── PLAYER IDENTITY ── */
+function _playerId(){
+  try {
+    var id = localStorage.getItem('opCeniza_pid');
+    if (!id) { id = 'p_' + Math.random().toString(36).slice(2,10); localStorage.setItem('opCeniza_pid', id); }
+    return id;
+  } catch(e){ return window._tempPid || (window._tempPid = 'p_'+Math.random().toString(36).slice(2,10)); }
+}
+function _playerName(){
+  try { return (localStorage.getItem('opCeniza_pname') || 'AGENTE').toUpperCase(); } catch(e){ return 'AGENTE'; }
+}
+function _setPlayerName(n){
+  try { localStorage.setItem('opCeniza_pname', (n||'AGENTE').toUpperCase().slice(0,20)); } catch(e){}
+}
+
 /* ── SUPABASE SYNC LAYER ── */
 function _sb(){ return window.__SUPA__; }
+
+var LOCAL_STATE = null;
 
 function _collectState(){
   var g = document.getElementById('game');
@@ -597,6 +826,8 @@ function _collectState(){
     var id = i.id.replace(/^inp-/, '');
     if (i.value) roles[id] = i.value;
   });
+  // Merge with existing local state to preserve votes/notes/names not in DOM
+  var base = LOCAL_STATE || {};
   return {
     phase: g.dataset.phase || '',
     act2choices: g.dataset.act2choices || '',
@@ -604,14 +835,31 @@ function _collectState(){
     outcome: g.dataset.outcome || '',
     starttime: g.dataset.starttime || '',
     roles: roles,
-    started: document.getElementById('app').classList.contains('active')
+    started: document.getElementById('app').classList.contains('active'),
+    votes: base.votes || {opt1:[],opt2:[],opt3:[],opt4:[],final1:[],final2:[],final3:[]},
+    names: base.names || {},
+    notes: base.notes || {act2:'',act3:'',test:'',exp:''},
+    assignedRoles: base.assignedRoles || {},
+    sharedEvidence: base.sharedEvidence || {}
   };
 }
 
 function _applyState(s){
   if (!s) return;
+  LOCAL_STATE = s;
   IS_APPLYING = true;
   try {
+    // Votes
+    _renderVotes(s.votes || {});
+    // Notes
+    var notes = s.notes || {};
+    var n2 = document.getElementById('notes-act2'); if (n2 && document.activeElement !== n2 && n2.value !== (notes.act2||'')) n2.value = notes.act2 || '';
+    var n3 = document.getElementById('notes-act3'); if (n3 && document.activeElement !== n3 && n3.value !== (notes.act3||'')) n3.value = notes.act3 || '';
+    var nt = document.getElementById('notes-test'); if (nt && document.activeElement !== nt && nt.value !== (notes.test||'')) nt.value = notes.test || '';
+    // Player count
+    var pc = Object.keys(s.names || {}).length || 1;
+    var pce = document.getElementById('rb-player-count'); if (pce) pce.textContent = pc;
+    var pp = document.getElementById('rb-player-plural'); if (pp) pp.textContent = pc === 1 ? '' : 'ES';
     var g = document.getElementById('game');
     g.dataset.act2choices = s.act2choices || '';
     g.dataset.finalchoice = s.finalchoice || '';
@@ -665,6 +913,126 @@ function _applyState(s){
   } finally { IS_APPLYING = false; }
 }
 
+function _renderVotes(votes){
+  var act2Keys = ['opt1','opt2','opt3','opt4'];
+  var finalKeys = ['final1','final2','final3'];
+  var pid = _playerId();
+  var names = (LOCAL_STATE && LOCAL_STATE.names) || {};
+
+  // Act 2: find top-2
+  var counts2 = act2Keys.map(function(k){ return {k:k, n:(votes[k]||[]).length}; });
+  var sorted2 = counts2.slice().sort(function(a,b){return b.n-a.n;});
+  var winners2 = sorted2.filter(function(x){return x.n>0;}).slice(0,2).map(function(x){return x.k;});
+  var totalAct2 = counts2.reduce(function(s,x){return s+x.n;},0);
+
+  act2Keys.forEach(function(k){
+    var arr = votes[k] || [];
+    var cnt = arr.length;
+    var vc = document.getElementById('vc-'+k); if (vc) vc.textContent = cnt;
+    var vf = document.getElementById('vf-'+k); if (vf) vf.style.width = (totalAct2>0 ? Math.round(cnt/totalAct2*100) : 0) + '%';
+    var vb = document.getElementById('vb-'+k); if (vb){
+      var voted = arr.indexOf(pid) >= 0;
+      vb.classList.toggle('voted', voted);
+      vb.textContent = voted ? '✓ Votado' : 'Votar';
+    }
+    var vl = document.getElementById('vl-'+k); if (vl) vl.textContent = arr.map(function(id){ return names[id] || 'Agente'; }).join(' · ');
+    var card = document.getElementById('oc-'+k); if (card) card.classList.toggle('winner', winners2.indexOf(k) >= 0 && cnt > 0);
+  });
+
+  // Sync sel counter & confirm button
+  var selCnt = document.getElementById('sel-cnt');
+  if (selCnt) selCnt.textContent = winners2.length;
+  var a2 = document.getElementById('a2-btn');
+  if (a2) a2.disabled = winners2.length < 2;
+  var a2h = document.getElementById('a2-hint');
+  if (a2h) a2h.textContent = winners2.length < 2 ? 'Necesitan votos en al menos 2 opciones diferentes' : '¡2 opciones lideran! Confirmen la votación.';
+
+  // Act 3: find top-1
+  var counts3 = finalKeys.map(function(k){ return {k:k, n:(votes[k]||[]).length}; });
+  var sorted3 = counts3.slice().sort(function(a,b){return b.n-a.n;});
+  var winner3 = sorted3[0] && sorted3[0].n > 0 ? sorted3[0].k : null;
+  var totalAct3 = counts3.reduce(function(s,x){return s+x.n;},0);
+
+  finalKeys.forEach(function(k){
+    var arr = votes[k] || [];
+    var cnt = arr.length;
+    var vc = document.getElementById('vc-'+k); if (vc) vc.textContent = cnt;
+    var vf = document.getElementById('vf-'+k); if (vf) vf.style.width = (totalAct3>0 ? Math.round(cnt/totalAct3*100) : 0) + '%';
+    var vb = document.getElementById('vb-'+k); if (vb){
+      var voted = arr.indexOf(pid) >= 0;
+      vb.classList.toggle('voted', voted);
+      vb.textContent = voted ? '✓ Votado' : 'Votar';
+    }
+    var vl = document.getElementById('vl-'+k); if (vl) vl.textContent = arr.map(function(id){ return names[id] || 'Agente'; }).join(' · ');
+    var card = document.getElementById('fc-'+k); if (card) card.classList.toggle('winner', winner3 === k && cnt > 0);
+  });
+
+  var exec = document.getElementById('exec-btn');
+  if (exec) exec.disabled = !winner3;
+  var eh = document.getElementById('exec-hint');
+  if (eh) eh.textContent = winner3 ? 'La táctica "'+winner3.toUpperCase()+'" lidera. Ejecuten cuando estén listos.' : 'Necesitan al menos un voto en una táctica';
+}
+
+function castVote(key){
+  if (!LOCAL_STATE) return;
+  if (!LOCAL_STATE.votes) LOCAL_STATE.votes = {opt1:[],opt2:[],opt3:[],opt4:[],final1:[],final2:[],final3:[]};
+  var pid = _playerId();
+  var isAct2 = key.indexOf('opt') === 0;
+  var isAct3 = key.indexOf('final') === 0;
+  // A player can vote 1 option in act3, and up to 2 options in act2
+  var v = LOCAL_STATE.votes;
+  var arr = v[key] || (v[key] = []);
+  var idx = arr.indexOf(pid);
+  if (idx >= 0) {
+    arr.splice(idx, 1);  // remove vote
+  } else {
+    if (isAct3) {
+      // remove from other final options
+      ['final1','final2','final3'].forEach(function(k){ if (v[k]) { var i = v[k].indexOf(pid); if (i>=0) v[k].splice(i,1); } });
+    } else if (isAct2) {
+      // limit to 2 votes total in act2
+      var totalAct2 = ['opt1','opt2','opt3','opt4'].reduce(function(s,k){ return s + ((v[k]||[]).indexOf(pid)>=0?1:0); }, 0);
+      if (totalAct2 >= 2) { toast('Solo puedes votar por 2 opciones. Deselecciona una primero.', 'err'); return; }
+    }
+    arr.push(pid);
+  }
+  // Register/update name
+  if (!LOCAL_STATE.names) LOCAL_STATE.names = {};
+  LOCAL_STATE.names[pid] = _playerName();
+  _renderVotes(LOCAL_STATE.votes);
+  syncState();
+}
+window.castVote = castVote;
+
+function confirmVotesAct2(){
+  if (!LOCAL_STATE || !LOCAL_STATE.votes) return;
+  var v = LOCAL_STATE.votes;
+  var counts = [{k:'opt1',n:(v.opt1||[]).length},{k:'opt2',n:(v.opt2||[]).length},{k:'opt3',n:(v.opt3||[]).length},{k:'opt4',n:(v.opt4||[]).length}];
+  var sorted = counts.sort(function(a,b){return b.n-a.n;});
+  var winners = sorted.filter(function(x){return x.n>0;}).slice(0,2).map(function(x){return x.k;});
+  if (winners.length < 2) { toast('Necesitan votos en al menos 2 opciones', 'err'); return; }
+  document.getElementById('game').dataset.act2choices = winners.join(',');
+  setPhase('act2reveal');
+  syncState();
+}
+window.confirmVotesAct2 = confirmVotesAct2;
+
+function confirmVoteAct3(){
+  if (!LOCAL_STATE || !LOCAL_STATE.votes) return;
+  var v = LOCAL_STATE.votes;
+  var counts = [{k:'final1',n:(v.final1||[]).length},{k:'final2',n:(v.final2||[]).length},{k:'final3',n:(v.final3||[]).length}];
+  var sorted = counts.sort(function(a,b){return b.n-a.n;});
+  if (!sorted[0] || sorted[0].n === 0) { toast('Nadie ha votado aún', 'err'); return; }
+  document.getElementById('game').dataset.finalchoice = sorted[0].k;
+  executeOperation();
+}
+window.confirmVoteAct3 = confirmVoteAct3;
+
+function updateNotes(v){ if (!LOCAL_STATE) return; if (!LOCAL_STATE.notes) LOCAL_STATE.notes = {}; LOCAL_STATE.notes.act2 = v; syncState(); }
+function updateNotes3(v){ if (!LOCAL_STATE) return; if (!LOCAL_STATE.notes) LOCAL_STATE.notes = {}; LOCAL_STATE.notes.act3 = v; syncState(); }
+function updateNotesT(v){ if (!LOCAL_STATE) return; if (!LOCAL_STATE.notes) LOCAL_STATE.notes = {}; LOCAL_STATE.notes.test = v; syncState(); }
+window.updateNotes = updateNotes; window.updateNotes3 = updateNotes3; window.updateNotesT = updateNotesT;
+
 function syncState(){
   if (IS_APPLYING || !ROOM_CODE) return;
   if (SYNC_TIMER) clearTimeout(SYNC_TIMER);
@@ -708,10 +1076,32 @@ function _enterRoom(code){
     .subscribe();
 }
 
+function _saveNameFromInput(){
+  var ni = document.getElementById('player-name');
+  var name = ni && ni.value ? ni.value.trim() : '';
+  if (name) _setPlayerName(name);
+}
+
+async function _registerPresence(state){
+  var pid = _playerId();
+  var name = _playerName();
+  state.names = state.names || {};
+  if (state.names[pid] !== name || !state.names[pid]) {
+    state.names[pid] = name;
+    LOCAL_STATE = state;
+    syncState();
+  }
+}
+
 async function createRoom(){
+  _saveNameFromInput();
   _setStatus('Creando sala…');
   var code = _randomCode();
-  var initial = {phase:'', act2choices:'', finalchoice:'', outcome:'', starttime:'', roles:{}, started:false};
+  var pid = _playerId();
+  var initial = {phase:'', act2choices:'', finalchoice:'', outcome:'', starttime:'', roles:{}, started:false,
+    votes:{opt1:[],opt2:[],opt3:[],opt4:[],final1:[],final2:[],final3:[]},
+    names:{}, notes:{act2:'',act3:'',test:''}};
+  initial.names[pid] = _playerName();
   var r = await _sb().from('game_rooms').insert({code:code, state:initial}).select().single();
   if (r.error) {
     if (r.error.code === '23505') return createRoom(); // dup, retry
@@ -724,6 +1114,7 @@ async function createRoom(){
 }
 
 async function joinRoom(){
+  _saveNameFromInput();
   var code = (document.getElementById('join-code').value||'').trim().toUpperCase();
   if (code.length !== 4) { _setStatus('El código debe tener 4 caracteres', 'err'); return; }
   _setStatus('Buscando sala…');
@@ -732,6 +1123,7 @@ async function joinRoom(){
   _setStatus('Conectado ✓', 'ok');
   _enterRoom(code);
   _applyState(r.data.state);
+  _registerPresence(r.data.state);
 }
 
 window.createRoom = createRoom;
@@ -768,6 +1160,8 @@ function goAct1() {
 
 function goAct2() { setPhase('act2'); syncState(); }
 function goAct3() { setPhase('act3'); syncState(); }
+function goTo(p) { setPhase(p); syncState(); }
+window.goTo = goTo;
 
 function goAct2Reveal() {
   var choices = getAct2Choices();
@@ -895,8 +1289,270 @@ function toast(msg, type) {
   setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 4000);
 }
 
-/* ── INIT: auto-join room from URL param ── */
+
+var EVIDENCE_POOL = {
+  jefe: [
+    {id:'j1', tag:'Directiva Ministerial', text:'El Ministro llamó personalmente exigiendo culpar a Aether Corp en 24 horas. Presión política clara.', power:'aether'},
+    {id:'j2', tag:'Amenazas Previas', text:'Registro de 3 llamadas anónimas a la Fiscalía la semana pasada: "Vance va a hablar. Se acaba el tiempo."', power:'falange'},
+    {id:'j3', tag:'Patrón Operativo', text:'Base de datos: en 2019, un atentado idéntico fue atribuido a "Frente Rojo Popular", un grupo inexistente. Misma metodología.', power:'falange'},
+    {id:'j4', tag:'Contacto Corvus', text:'El informante "Corvus" mencionó un nombre: Coronel (r) Marco Cárdenas, ex-jefe de operaciones especiales.', power:'falange'}
+  ],
+  explosivos: [
+    {id:'e1', tag:'Firma Química', text:'RDX de grado militar, lote M-217. Ese lote fue reportado como "destruido" en 2018 por el Ejército — pero nunca hubo verificación.', power:'falange'},
+    {id:'e2', tag:'Detonador', text:'Modelo H-4 Kestrel, exclusivo de Fuerzas Especiales. Solo 40 unidades en el país, todas asignadas al Regimiento 7.', power:'falange'},
+    {id:'e3', tag:'Carga Direccional', text:'El cráter es asimétrico: la carga estaba orientada para matar a alguien específico en el andén 3. Diseño de sicariato, no de terror masivo.', power:'falange'},
+    {id:'e4', tag:'Temporizador', text:'Análisis del residuo indica temporizador de 90 minutos. El autor tuvo tiempo de irse caminando, tal como declaró el guardia.', power:'neutral'}
+  ],
+  hacker: [
+    {id:'h1', tag:'Log de Aether', text:'Acceso remoto no autorizado a servidores de Aether 48h antes del atentado. Origen: VPN militar.', power:'falange'},
+    {id:'h2', tag:'Metadata del Video', text:'El video de "La Falange Gris" fue subido desde una IP asignada al Ministerio de Defensa (edificio anexo).', power:'falange'},
+    {id:'h3', tag:'Transacción Cripto', text:'500,000 USD en Bitcoin movidos hace 10 días desde una wallet anónima a otra vinculada a "Fundación Águila" (asociación de exmilitares).', power:'falange'},
+    {id:'h4', tag:'Correo Interceptado', text:'Correo cifrado enviado hace 4 días: "Todo listo para el 15. La denunciante estará ahí." Firmado: C.M.', power:'falange'}
+  ],
+  perfilador: [
+    {id:'p1', tag:'Perfil del Comprador', text:'Hombre 40-55 años, entrenamiento militar avanzado, disciplina y control emocional altísimos. NO es un terrorista ideológico — es un profesional.', power:'falange'},
+    {id:'p2', tag:'Análisis del Video', text:'La postura del vocero es actuada. La jerga usada es de manuales militares antiguos, no de células reales. Es una puesta en escena.', power:'falange'},
+    {id:'p3', tag:'Comparación Histórica', text:'Modus operandi idéntico al Coronel (r) Marco Cárdenas: chivo expiatorio corporativo, falsa reivindicación paramilitar, huida por vía aérea privada.', power:'falange'},
+    {id:'p4', tag:'Predicción de Fuga', text:'Si es Cárdenas, tendrá una ruta de escape en avión privado planeada con 72h de anticipación. Aeropuerto de Los Alcones es el más probable.', power:'falange'}
+  ],
+  campo: [
+    {id:'c1', tag:'Testigo Adicional', text:'Un vendedor ambulante vio dos vehículos de escolta con placas diplomáticas rusas cerca del sitio 30 minutos antes.', power:'neutral'},
+    {id:'c2', tag:'Cámara Oculta', text:'Cámara de un cajero automático capta a un hombre con tatuaje "ORDEN" a las 07:48. Rostro parcialmente visible.', power:'falange'},
+    {id:'c3', tag:'Recibo Recuperado', text:'Recibo de gasolinera "El Águila", en la ruta a la finca de la Fundación Águila. Fecha: mañana del atentado, 05:12 AM.', power:'falange'},
+    {id:'c4', tag:'Vigilancia de Finca', text:'La "Fundación Águila" es una finca de 50 hectáreas registrada a nombre de exmilitares. Actividad inusual en las últimas 48h: 12 vehículos entrando.', power:'falange'}
+  ],
+  financiero: [
+    {id:'f1', tag:'Cuenta Vanguard', text:'Vanguard Solutions (empresa fantasma de Aether según reporte inicial) NO es de Aether. Es de un fondo ciego. Beneficiario final: Fundación Águila.', power:'falange'},
+    {id:'f2', tag:'Origen del Dinero', text:'El dinero de Vanguard proviene de una asignación clasificada del Ministerio de Defensa — cuenta "Fondo Operaciones Especiales".', power:'falange'},
+    {id:'f3', tag:'Firmante', text:'El único firmante autorizado de esa cuenta ministerial es el Coronel (r) Marco Cárdenas.', power:'falange'},
+    {id:'f4', tag:'Timing Financiero', text:'Los 3 pagos de Vanguard coincidieron día por día con: (1) contrato de Elena Vance, (2) auditoría interna que ella pidió, (3) día del atentado.', power:'falange'}
+  ],
+  forense: [
+    {id:'fo1', tag:'ADN en Asiento', text:'ADN encontrado en el asiento del conductor: coincide con muestra en base de datos militar. Nombre: Sgto. Diego Ramos, subordinado directo de Cárdenas.', power:'falange'},
+    {id:'fo2', tag:'Fibra Textil', text:'Fibra de uniforme discontinuado del Ejército, lote 2015. Aún usado exclusivamente por la Fundación Águila en sus "ceremonias".', power:'falange'},
+    {id:'fo3', tag:'Huella Parcial', text:'Huella parcial en el detonador. Coincidencia 87% con base de datos: Marco Cárdenas.', power:'falange'},
+    {id:'fo4', tag:'Residuo Bebida', text:'Residuo de café en el vaso descartado en la furgoneta. Marca exclusiva de la cafetería interna de la Fundación Águila.', power:'falange'}
+  ],
+  politico: [
+    {id:'po1', tag:'Contactos Recientes', text:'Cárdenas se reunió el mes pasado con el Vicepresidente y con 2 legisladores de la comisión de Defensa.', power:'falange'},
+    {id:'po2', tag:'Campaña Mediática', text:'3 medios afines al gobierno lanzaron campaña anti-Aether 24 horas después del atentado. Redes coordinadas: los mismos hashtags, misma hora.', power:'aether'},
+    {id:'po3', tag:'Denuncia Bloqueada', text:'Elena Vance tenía cita en la Fiscalía a las 09:30 AM del día del atentado. Iba a denunciar desvío de microchips militares a la Fundación Águila.', power:'falange'},
+    {id:'po4', tag:'Testigo Asistente', text:'El asistente de Cárdenas declaró en confidencia: "El Coronel dijo que Vance no iba a llegar a esa reunión. Que él haría lo necesario."', power:'falange'}
+  ]
+};
+var ROLE_LABELS = {jefe:'Jefe de Operaciones', explosivos:'Analista de Explosivos', hacker:'Hacker Forense', perfilador:'Perfilador Criminal', campo:'Agente de Campo', financiero:'Analista Financiero', forense:'Forense Científico', politico:'Enlace Político'};
+var ROLE_IDS = ['jefe','explosivos','hacker','perfilador','campo','financiero','forense','politico'];
+
+
+/* ── RANDOM ROLE ASSIGNMENT ── */
+function assignRolesRandom(){
+  if (!LOCAL_STATE) return;
+  var players = Object.keys(LOCAL_STATE.names || {});
+  if (players.length === 0) { toast('Aún no hay jugadores conectados', 'err'); return; }
+  // Fisher-Yates shuffle
+  var pool = players.slice();
+  for (var i = pool.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
+  var roles = ROLE_IDS.slice();
+  // Also shuffle roles
+  for (var i = roles.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = roles[i]; roles[i] = roles[j]; roles[j] = t; }
+  var assigned = {};
+  for (var i = 0; i < pool.length && i < roles.length; i++) assigned[pool[i]] = roles[i];
+  LOCAL_STATE.assignedRoles = assigned;
+  // Also fill the role name inputs so the sidebar roster updates
+  ROLE_IDS.forEach(function(rid){
+    var inp = document.getElementById('inp-'+rid); if (!inp) return;
+    var playerId = Object.keys(assigned).filter(function(pid){return assigned[pid]===rid;})[0];
+    var name = playerId && LOCAL_STATE.names ? LOCAL_STATE.names[playerId] : '';
+    inp.value = name || '';
+    setRole(rid, inp);
+  });
+  _updateRoleMe();
+  syncState();
+  toast('Roles asignados aleatoriamente', 'ok');
+}
+window.assignRolesRandom = assignRolesRandom;
+
+function _updateRoleMe(){
+  if (!LOCAL_STATE || !LOCAL_STATE.assignedRoles) return;
+  var pid = _playerId();
+  var myRole = LOCAL_STATE.assignedRoles[pid];
+  var msg, sub;
+  if (myRole) {
+    msg = 'TU ROL: ' + (ROLE_LABELS[myRole] || myRole).toUpperCase();
+    sub = 'Puedes compartir las pruebas de este rol';
+  } else {
+    msg = '— Sin rol asignado —';
+    sub = 'Espera a que el Jefe asigne roles';
+  }
+  ['role-me-roles','role-me-evidencia'].forEach(function(id){
+    var el = document.getElementById(id); if (!el) return;
+    el.style.display = 'block';
+    el.innerHTML = msg + '<small>' + sub + '</small>';
+    el.style.background = myRole ? 'var(--gold)' : 'var(--bd)';
+    el.style.color = myRole ? 'var(--bg)' : 'var(--tx2)';
+  });
+  // Jefe name in expediente
+  var jefePid = Object.keys(LOCAL_STATE.assignedRoles).filter(function(p){return LOCAL_STATE.assignedRoles[p]==='jefe';})[0];
+  var jn = document.getElementById('jefe-name');
+  if (jn) jn.textContent = jefePid && LOCAL_STATE.names ? (LOCAL_STATE.names[jefePid] || 'Sin nombre') : 'no asignado';
+}
+
+/* ── EVIDENCE SHARING & VOTING ── */
+var CURRENT_ROLE_FILTER = 'mine';
+
+function _myRole(){ return (LOCAL_STATE && LOCAL_STATE.assignedRoles) ? LOCAL_STATE.assignedRoles[_playerId()] : null; }
+
+function shareEvidence(evId){
+  if (!LOCAL_STATE) return;
+  LOCAL_STATE.sharedEvidence = LOCAL_STATE.sharedEvidence || {};
+  var owner = _evOwner(evId);
+  if (owner !== _myRole()) { toast('Solo puedes compartir pruebas de tu rol', 'err'); return; }
+  if (LOCAL_STATE.sharedEvidence[evId]) {
+    delete LOCAL_STATE.sharedEvidence[evId];  // unshare
+  } else {
+    LOCAL_STATE.sharedEvidence[evId] = {sharedBy: _playerId(), votes: {}};
+  }
+  _renderEvidenceList();
+  _renderVotingList();
+  syncState();
+}
+window.shareEvidence = shareEvidence;
+
+function _evOwner(evId){
+  for (var r in EVIDENCE_POOL) {
+    if (EVIDENCE_POOL[r].some(function(e){return e.id===evId;})) return r;
+  }
+  return null;
+}
+function _evItem(evId){
+  for (var r in EVIDENCE_POOL) {
+    var f = EVIDENCE_POOL[r].filter(function(e){return e.id===evId;})[0];
+    if (f) return f;
+  }
+  return null;
+}
+
+function voteEvidence(evId, choice){
+  if (!LOCAL_STATE) return;
+  LOCAL_STATE.sharedEvidence = LOCAL_STATE.sharedEvidence || {};
+  var ev = LOCAL_STATE.sharedEvidence[evId]; if (!ev) return;
+  ev.votes = ev.votes || {};
+  var pid = _playerId();
+  if (ev.votes[pid] === choice) delete ev.votes[pid];
+  else ev.votes[pid] = choice;
+  _renderVotingList();
+  syncState();
+}
+window.voteEvidence = voteEvidence;
+
+function _isApproved(ev){
+  if (!ev) return false;
+  var yes = 0, no = 0;
+  for (var p in ev.votes) { if (ev.votes[p] === 'yes') yes++; else if (ev.votes[p] === 'no') no++; }
+  if (yes > no) return true;
+  if (no > yes) return false;
+  // tie: jefe decides
+  var jefePid = null;
+  if (LOCAL_STATE.assignedRoles) jefePid = Object.keys(LOCAL_STATE.assignedRoles).filter(function(p){return LOCAL_STATE.assignedRoles[p]==='jefe';})[0];
+  if (jefePid && ev.votes[jefePid]) return ev.votes[jefePid] === 'yes';
+  return false;
+}
+
+function _renderEvidenceList(){
+  var host = document.getElementById('evidence-list'); if (!host) return;
+  var myR = _myRole();
+  // Filter buttons
+  var filterHost = document.getElementById('role-filter');
+  if (filterHost && !filterHost.dataset.built) {
+    filterHost.dataset.built = '1';
+    var btns = ['<button data-f="mine" class="mine active" onclick="setRoleFilter(\'mine\')">Mis pruebas</button>','<button data-f="all" onclick="setRoleFilter(\'all\')">Todas</button>'];
+    ROLE_IDS.forEach(function(r){ btns.push('<button data-f="'+r+'" onclick="setRoleFilter(\''+r+'\')">'+ROLE_LABELS[r]+'</button>'); });
+    filterHost.innerHTML = btns.join('');
+  }
+  // Highlight active filter
+  if (filterHost) filterHost.querySelectorAll('button').forEach(function(b){ b.classList.toggle('active', b.dataset.f === CURRENT_ROLE_FILTER); });
+
+  var shared = (LOCAL_STATE && LOCAL_STATE.sharedEvidence) || {};
+  var out = [];
+  ROLE_IDS.forEach(function(r){
+    if (CURRENT_ROLE_FILTER === 'mine' && r !== myR) return;
+    if (CURRENT_ROLE_FILTER !== 'mine' && CURRENT_ROLE_FILTER !== 'all' && r !== CURRENT_ROLE_FILTER) return;
+    EVIDENCE_POOL[r].forEach(function(ev){
+      var isMine = r === myR;
+      var isShared = !!shared[ev.id];
+      var cls = 'evc' + (isMine?' mine':'') + (isShared?' shared':'');
+      var actions = isMine
+        ? '<button class="share-btn'+(isShared?' shared':'')+'" onclick="shareEvidence(\''+ev.id+'\')">'+(isShared?'✓ Compartida':'Compartir con el equipo')+'</button>'
+        : '<span style="font-family:\'Courier Prime\',monospace;font-size:10px;color:var(--tx3)">Solo el rol '+ROLE_LABELS[r]+' puede compartir esto</span>';
+      out.push('<div class="'+cls+'"><div class="evc-owner">Rol: <strong>'+ROLE_LABELS[r]+'</strong></div><div class="evc-tag">'+ev.tag+'</div><div class="evc-text">'+ev.text+'</div><div class="evc-actions">'+actions+'</div></div>');
+    });
+  });
+  if (out.length === 0) out.push('<p style="color:var(--tx3);font-style:italic;padding:20px 0">No hay pruebas en este filtro.</p>');
+  host.innerHTML = out.join('');
+}
+
+function setRoleFilter(f){ CURRENT_ROLE_FILTER = f; _renderEvidenceList(); }
+window.setRoleFilter = setRoleFilter;
+
+function _renderVotingList(){
+  var host = document.getElementById('voting-list'); if (!host) return;
+  var shared = (LOCAL_STATE && LOCAL_STATE.sharedEvidence) || {};
+  var ids = Object.keys(shared);
+  if (ids.length === 0) { host.innerHTML = '<p style="color:var(--tx3);font-style:italic;padding:14px 0">— Aún no se han compartido pruebas —</p>'; }
+  else {
+    var pid = _playerId();
+    var out = ids.map(function(evId){
+      var ev = _evItem(evId); if (!ev) return '';
+      var owner = _evOwner(evId);
+      var voteInfo = shared[evId];
+      var yes = 0, no = 0;
+      for (var p in voteInfo.votes) { if (voteInfo.votes[p] === 'yes') yes++; else if (voteInfo.votes[p] === 'no') no++; }
+      var myVote = voteInfo.votes[pid];
+      var approved = _isApproved(voteInfo);
+      var cls = 'evc' + (approved?' shared':'');
+      return '<div class="'+cls+'"><div class="evc-owner">Compartido por rol: <strong>'+ROLE_LABELS[owner]+'</strong></div><div class="evc-tag">'+ev.tag+'</div><div class="evc-text">'+ev.text+'</div>'
+        +'<div class="tally-row"><span class="tr-lbl">Votos:</span><span class="tr-yes">✓ '+yes+'</span><span class="tr-no">✗ '+no+'</span>'+(approved?' <span style="color:var(--green);font-weight:700;margin-left:8px">APROBADA</span>':'')+'</div>'
+        +'<div class="evc-actions"><button class="vote-btn'+(myVote==='yes'?' voted':'')+'" onclick="voteEvidence(\''+evId+'\',\'yes\')">A favor</button>'
+        +'<button class="vote-btn'+(myVote==='no'?' voted':'')+'" onclick="voteEvidence(\''+evId+'\',\'no\')">En contra</button></div></div>';
+    }).join('');
+    host.innerHTML = out;
+  }
+  // Approved expediente
+  var expHost = document.getElementById('expediente-list'); if (!expHost) return;
+  var approvedIds = ids.filter(function(id){ return _isApproved(shared[id]); });
+  if (approvedIds.length === 0) expHost.innerHTML = '— Aún no hay pruebas aprobadas —';
+  else {
+    var expOut = approvedIds.map(function(id){
+      var ev = _evItem(id); var owner = _evOwner(id);
+      return '<div class="expediente-item"><div class="evc-tag">'+ev.tag+'</div><div class="evc-text">'+ev.text+'</div><div class="evc-owner">De: '+ROLE_LABELS[owner]+'</div></div>';
+    }).join('');
+    expHost.innerHTML = expOut;
+  }
+}
+
+function updateNotesExp(v){ if (!LOCAL_STATE) return; if (!LOCAL_STATE.notes) LOCAL_STATE.notes = {}; LOCAL_STATE.notes.exp = v; syncState(); }
+window.updateNotesExp = updateNotesExp;
+
+/* Hook: when state applied, refresh evidence UI if in those phases */
+var _origApply = _applyState;
+_applyState = function(s){
+  _origApply(s);
+  _updateRoleMe();
+  if (s && s.phase === 'evidencia') _renderEvidenceList();
+  if (s && s.phase === 'expediente') _renderVotingList();
+  var ne = document.getElementById('notes-exp');
+  if (ne && document.activeElement !== ne && s && s.notes && ne.value !== (s.notes.exp||'')) ne.value = s.notes.exp || '';
+};
+
+
+/* ── INIT: prefill name + auto-join room from URL param ── */
 (function(){
+  // Prefill name input from localStorage
+  try {
+    var saved = localStorage.getItem('opCeniza_pname');
+    var ni = document.getElementById('player-name');
+    if (saved && ni) ni.value = saved;
+  } catch(e){}
   function tryAutoJoin(){
     try {
       var url = new URL(window.location.href);
