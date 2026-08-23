@@ -293,6 +293,26 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 .tally-row .tr-yes{color:var(--green);font-weight:700}
 .tally-row .tr-no{color:var(--red)}
 
+
+/* Connected players panel */
+.players-panel{background:var(--surface);border:1px solid var(--bd);padding:14px 18px;margin-bottom:20px}
+.pp-lbl{font-family:'Oswald',sans-serif;font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--tx3);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.pp-count{background:var(--gold);color:var(--bg);font-size:10px;padding:2px 8px;letter-spacing:.15em;font-weight:700}
+.pp-list{display:flex;flex-wrap:wrap;gap:8px}
+.pp-chip{background:var(--s2);border:1px solid var(--bd);padding:5px 12px;font-family:'Courier Prime',monospace;font-size:12px;color:var(--tx);display:flex;align-items:center;gap:6px}
+.pp-chip::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;animation:sync-p 2s ease-in-out infinite}
+.pp-chip.assigned{border-color:var(--gold);color:var(--gold)}
+.pp-chip.me{border-color:var(--gold);background:var(--gold);color:var(--bg)}
+.pp-empty{color:var(--tx3);font-style:italic;font-family:'Courier Prime',monospace;font-size:12px}
+
+/* Manual assign dropdown */
+.rcard{position:relative}
+.rcard-assigned-name{font-family:'Courier Prime',monospace;font-size:11px;color:var(--green);font-weight:700;margin-top:6px;padding:4px 6px;background:var(--greenbg);border-left:2px solid var(--green);display:none}
+.rcard.assigned .rcard-assigned-name{display:block}
+.manual-assign{margin-top:6px;display:none}
+.rcard .manual-assign select{width:100%;background:var(--bg);border:1px solid var(--bd);color:var(--tx2);font-family:'Courier Prime',monospace;font-size:11px;padding:3px 6px}
+.is-jefe .manual-assign{display:block}
+
 </style>
 
 <!-- ── LOBBY (room create / join) ── -->
@@ -385,6 +405,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 
         <!-- PHASE: ROLES -->
         <section class="phase" id="phase-roles">
+          <div class="players-panel">
+            <div class="pp-lbl"><span>Jugadores conectados</span><span class="pp-count" id="pp-count">0</span></div>
+            <div class="pp-list" id="pp-list"><span class="pp-empty">— Esperando jugadores —</span></div>
+          </div>
+
           <div class="role-me" id="role-me-roles" style="display:none">— Sin rol asignado —<small>Presiona "Asignar aleatoriamente" cuando todos hayan entrado</small></div>
           <div class="eyebrow">Asignación · Equipo de Investigación</div>
           <h1 class="ph-title">Designación de Agentes</h1>
@@ -395,48 +420,64 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
               <div class="rcard-title">Jefe/a de Operaciones</div>
               <div class="rcard-desc">Coordina el equipo, administra recursos y tiene voto de desempate.</div>
               <input class="rinput" id="inp-jefe" placeholder="Nombre del agente…" oninput="setRole('jefe',this)">
+              <div class="rcard-assigned-name" id="rcn-jefe">—</div>
+              <div class="manual-assign"><select id="ma-jefe" onchange="manualAssign('jefe', this.value)"><option value="">— Sin asignar —</option></select></div>
             </div>
             <div class="rcard" id="rc-explosivos">
               <div class="rcard-num">02</div>
               <div class="rcard-title">Experto/a en Explosivos</div>
               <div class="rcard-desc">Analiza componentes químicos, cráteres y restos de armamento.</div>
               <input class="rinput" id="inp-explosivos" placeholder="Nombre del agente…" oninput="setRole('explosivos',this)">
+              <div class="rcard-assigned-name" id="rcn-explosivos">—</div>
+              <div class="manual-assign"><select id="ma-explosivos" onchange="manualAssign('explosivos', this.value)"><option value="">— Sin asignar —</option></select></div>
             </div>
             <div class="rcard" id="rc-hacker">
               <div class="rcard-num">03</div>
               <div class="rcard-title">Analista Ciberinteligencia</div>
               <div class="rcard-desc">Rastrea servidores, cámaras, metadatos y comunicaciones.</div>
               <input class="rinput" id="inp-hacker" placeholder="Nombre del agente…" oninput="setRole('hacker',this)">
+              <div class="rcard-assigned-name" id="rcn-hacker">—</div>
+              <div class="manual-assign"><select id="ma-hacker" onchange="manualAssign('hacker', this.value)"><option value="">— Sin asignar —</option></select></div>
             </div>
             <div class="rcard" id="rc-perfilador">
               <div class="rcard-num">04</div>
               <div class="rcard-title">Perfilador Criminal</div>
               <div class="rcard-desc">Estudia el modus operandi y la psicología del culpable.</div>
               <input class="rinput" id="inp-perfilador" placeholder="Nombre del agente…" oninput="setRole('perfilador',this)">
+              <div class="rcard-assigned-name" id="rcn-perfilador">—</div>
+              <div class="manual-assign"><select id="ma-perfilador" onchange="manualAssign('perfilador', this.value)"><option value="">— Sin asignar —</option></select></div>
             </div>
             <div class="rcard" id="rc-campo">
               <div class="rcard-num">05</div>
               <div class="rcard-title">Investigador/a de Campo</div>
               <div class="rcard-desc">Trata con testigos, informantes y sospechosos detenidos.</div>
               <input class="rinput" id="inp-campo" placeholder="Nombre del agente…" oninput="setRole('campo',this)">
+              <div class="rcard-assigned-name" id="rcn-campo">—</div>
+              <div class="manual-assign"><select id="ma-campo" onchange="manualAssign('campo', this.value)"><option value="">— Sin asignar —</option></select></div>
             </div>
             <div class="rcard" id="rc-financiero">
               <div class="rcard-num">06</div>
               <div class="rcard-title">Analista Financiero</div>
               <div class="rcard-desc">Sigue el dinero: cuentas offshore y empresas fantasma.</div>
               <input class="rinput" id="inp-financiero" placeholder="Nombre del agente…" oninput="setRole('financiero',this)">
+              <div class="rcard-assigned-name" id="rcn-financiero">—</div>
+              <div class="manual-assign"><select id="ma-financiero" onchange="manualAssign('financiero', this.value)"><option value="">— Sin asignar —</option></select></div>
             </div>
             <div class="rcard" id="rc-forense">
               <div class="rcard-num">07</div>
               <div class="rcard-title">Médico/a Forense</div>
               <div class="rcard-desc">Examina víctimas, metralla y causa exacta de muerte.</div>
               <input class="rinput" id="inp-forense" placeholder="Nombre del agente…" oninput="setRole('forense',this)">
+              <div class="rcard-assigned-name" id="rcn-forense">—</div>
+              <div class="manual-assign"><select id="ma-forense" onchange="manualAssign('forense', this.value)"><option value="">— Sin asignar —</option></select></div>
             </div>
             <div class="rcard" id="rc-politico">
               <div class="rcard-num">08</div>
               <div class="rcard-title">Oficial Enlace Político</div>
               <div class="rcard-desc">Gestiona la presión mediática y consigue órdenes judiciales.</div>
               <input class="rinput" id="inp-politico" placeholder="Nombre del agente…" oninput="setRole('politico',this)">
+              <div class="rcard-assigned-name" id="rcn-politico">—</div>
+              <div class="manual-assign"><select id="ma-politico" onchange="manualAssign('politico', this.value)"><option value="">— Sin asignar —</option></select></div>
             </div>
           </div>
           <div class="divider"></div>
@@ -1542,6 +1583,81 @@ _applyState = function(s){
   if (s && s.phase === 'expediente') _renderVotingList();
   var ne = document.getElementById('notes-exp');
   if (ne && document.activeElement !== ne && s && s.notes && ne.value !== (s.notes.exp||'')) ne.value = s.notes.exp || '';
+};
+
+
+
+function _renderPlayersPanel(){
+  var list = document.getElementById('pp-list'); if (!list) return;
+  var names = (LOCAL_STATE && LOCAL_STATE.names) || {};
+  var assigned = (LOCAL_STATE && LOCAL_STATE.assignedRoles) || {};
+  var pids = Object.keys(names);
+  var myPid = _playerId();
+  var count = document.getElementById('pp-count'); if (count) count.textContent = pids.length;
+  if (pids.length === 0) { list.innerHTML = '<span class="pp-empty">— Esperando jugadores —</span>'; }
+  else {
+    list.innerHTML = pids.map(function(pid){
+      var cls = 'pp-chip';
+      if (assigned[pid]) cls += ' assigned';
+      if (pid === myPid) cls += ' me';
+      var name = names[pid] || 'Agente';
+      var role = assigned[pid] ? ' · '+ROLE_LABELS[assigned[pid]] : '';
+      return '<span class="'+cls+'">'+name+role+'</span>';
+    }).join('');
+  }
+}
+
+function _renderRoleCards(){
+  if (!LOCAL_STATE) return;
+  var assigned = LOCAL_STATE.assignedRoles || {};
+  var names = LOCAL_STATE.names || {};
+  var myPid = _playerId();
+  var myRole = assigned[myPid];
+  var iAmJefe = myRole === 'jefe';
+  ROLE_IDS.forEach(function(rid){
+    var rcn = document.getElementById('rcn-'+rid);
+    var pid = Object.keys(assigned).filter(function(p){return assigned[p]===rid;})[0];
+    var name = pid ? (names[pid] || 'Agente') : '';
+    if (rcn) rcn.textContent = name ? '👤 ' + name : '—';
+    var rc = document.getElementById('rc-'+rid); if (rc) rc.classList.toggle('assigned', !!name);
+    rc && rc.classList.toggle('is-jefe', iAmJefe);
+    // Populate dropdown
+    var sel = document.getElementById('ma-'+rid); if (!sel) return;
+    var currentVal = pid || '';
+    var opts = ['<option value="">— Sin asignar —</option>'];
+    Object.keys(names).forEach(function(p){
+      var takenBy = Object.keys(assigned).filter(function(x){return assigned[x] && x !== p && x === p;})[0];
+      opts.push('<option value="'+p+'"'+(p===currentVal?' selected':'')+'>'+names[p]+'</option>');
+    });
+    sel.innerHTML = opts.join('');
+  });
+}
+
+function manualAssign(roleId, playerId){
+  if (!LOCAL_STATE) return;
+  var myPid = _playerId();
+  var iAmJefe = (LOCAL_STATE.assignedRoles || {})[myPid] === 'jefe';
+  if (!iAmJefe) { toast('Solo el Jefe puede reasignar roles', 'err'); _renderRoleCards(); return; }
+  LOCAL_STATE.assignedRoles = LOCAL_STATE.assignedRoles || {};
+  // Remove any player currently in this role
+  Object.keys(LOCAL_STATE.assignedRoles).forEach(function(p){ if (LOCAL_STATE.assignedRoles[p] === roleId) delete LOCAL_STATE.assignedRoles[p]; });
+  // Remove new player from any other role (only one role per player)
+  if (playerId) { delete LOCAL_STATE.assignedRoles[playerId]; LOCAL_STATE.assignedRoles[playerId] = roleId; }
+  // Update role input value
+  var inp = document.getElementById('inp-'+roleId); if (inp) { inp.value = playerId ? (LOCAL_STATE.names[playerId] || '') : ''; setRole(roleId, inp); }
+  _renderRoleCards();
+  _renderPlayersPanel();
+  _updateRoleMe();
+  syncState();
+}
+window.manualAssign = manualAssign;
+
+/* Hook into _applyState to also refresh these panels */
+var _origApply2 = _applyState;
+_applyState = function(s){
+  _origApply2(s);
+  _renderPlayersPanel();
+  _renderRoleCards();
 };
 
 
