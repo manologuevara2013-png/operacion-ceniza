@@ -77,6 +77,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;b
 #game[data-phase="testimonios"] #phase-testimonios{display:block}
 #game[data-phase="evidencia"] #phase-evidencia{display:block}
 #game[data-phase="expediente"] #phase-expediente{display:block}
+#game[data-phase="investigacion"] #phase-investigacion{display:block}
+#game[data-phase="acusacion"] #phase-acusacion{display:block}
 #game[data-phase="act2"] #phase-act2{display:block}
 #game[data-phase="act2reveal"] #phase-act2reveal{display:block}
 #game[data-phase="act3"] #phase-act3{display:block}
@@ -270,6 +272,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 .assign-btn-row{display:flex;gap:12px;margin-bottom:20px}
 #game[data-phase="evidencia"] #phase-evidencia{display:block}
 #game[data-phase="expediente"] #phase-expediente{display:block}
+#game[data-phase="investigacion"] #phase-investigacion{display:block}
+#game[data-phase="acusacion"] #phase-acusacion{display:block}
 .evc{border:1px solid var(--bd);background:var(--s2);padding:16px 20px;margin-bottom:14px;position:relative}
 .evc.mine{border-color:var(--gold);border-left-width:4px}
 .evc.shared{border-color:var(--green);background:var(--greenbg)}
@@ -312,6 +316,39 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 .manual-assign{margin-top:6px;display:none}
 .rcard .manual-assign select{width:100%;background:var(--bg);border:1px solid var(--bd);color:var(--tx2);font-family:'Courier Prime',monospace;font-size:11px;padding:3px 6px}
 .is-jefe .manual-assign{display:block}
+
+
+/* v5: Investigation actions */
+#game[data-phase="investigacion"] #phase-investigacion{display:block}
+#game[data-phase="acusacion"] #phase-acusacion{display:block}
+.action-card{border:1px solid var(--bd);background:var(--s2);padding:16px 20px;margin-bottom:14px;position:relative;transition:all .2s}
+.action-card.mine{border-left:4px solid var(--gold)}
+.action-card.done{background:var(--greenbg);border-color:var(--green)}
+.ac-title{font-family:'Oswald',sans-serif;font-size:14px;font-weight:700;letter-spacing:.06em;color:var(--tx);margin-bottom:4px;text-transform:uppercase}
+.ac-owner{font-family:'Courier Prime',monospace;font-size:10px;color:var(--tx3);letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px}
+.ac-owner strong{color:var(--gold)}
+.ac-cost{font-family:'Courier Prime',monospace;font-size:11px;color:var(--tx2);margin-bottom:10px}
+.ac-btn{background:var(--gold);color:var(--bg);border:none;font-family:'Oswald',sans-serif;font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:8px 14px;cursor:pointer}
+.ac-btn:disabled{background:var(--bd);color:var(--tx3);cursor:not-allowed}
+.ac-result{margin-top:12px;padding:12px 14px;background:var(--bg);border-left:3px solid var(--green);font-family:'Courier Prime',monospace;font-size:12px;color:var(--tx);line-height:1.55}
+.ac-result strong{color:var(--green)}
+.ac-locked-note{font-family:'Courier Prime',monospace;font-size:10px;color:var(--tx3);font-style:italic;margin-top:6px}
+.filter-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--bd)}
+.filter-tabs button{background:transparent;border:1px solid var(--bd);color:var(--tx2);font-family:'DM Sans',sans-serif;font-size:11px;padding:5px 10px;cursor:pointer}
+.filter-tabs button.active{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+.filter-tabs button.mine{border-color:var(--gold);color:var(--gold)}
+.filter-tabs button.mine.active{background:var(--gold);color:var(--bg)}
+.suspect-card{border:2px solid var(--bd);background:var(--s2);padding:20px;margin-bottom:16px;cursor:pointer;transition:all .2s;position:relative}
+.suspect-card:hover{border-color:var(--gold)}
+.suspect-card.voted{border-color:var(--gold);background:var(--bg);box-shadow:0 0 0 1px var(--gold)}
+.suspect-card.winner{border-color:var(--green)!important;box-shadow:0 0 0 2px var(--green)}
+.sc-name{font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;letter-spacing:.05em;color:var(--tx);margin-bottom:6px;text-transform:uppercase}
+.sc-profile{font-family:'Courier Prime',monospace;font-size:12px;color:var(--tx2);line-height:1.5;margin-bottom:8px}
+.sc-motive{font-family:'Courier Prime',monospace;font-size:12px;color:var(--gold);font-style:italic;margin-bottom:12px;padding-left:12px;border-left:2px solid var(--gold)}
+.progress-bar{background:var(--bd2);height:6px;margin-top:8px;overflow:hidden}
+.progress-bar-fill{background:var(--gold);height:100%;transition:width .3s}
+.action-progress{font-family:'Courier Prime',monospace;font-size:11px;color:var(--tx2);margin-bottom:20px;padding:10px 14px;background:var(--surface);border-left:3px solid var(--gold)}
+.action-progress strong{color:var(--gold)}
 
 </style>
 
@@ -591,6 +628,39 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
           <div class="btn-row">
             <button class="btn btn-s" onclick="goTo('evidencia')">&#8592; Volver a Compartir</button>
             <button class="btn btn-p" onclick="goAct2()">Avanzar al Acto II · Elegir líneas →</button>
+          </div>
+        </section>
+
+
+        <!-- PHASE: INVESTIGACIÓN (each role performs unique actions) -->
+        <section class="phase" id="phase-investigacion">
+          <div class="eyebrow">Fase Central · Investigación Activa</div>
+          <h1 class="ph-title">Ejecuten sus Acciones de Investigación</h1>
+          <p class="ph-sub">Cada agente tiene <strong>3 acciones exclusivas</strong> según su rol. Solo tú puedes ejecutar las tuyas — los demás ven los resultados en el expediente compartido. <strong>El culpable es distinto cada partida.</strong></p>
+          <div class="role-me" id="role-me-invest">— Sin rol asignado —<small>Regresa a la fase de Roles</small></div>
+          <div class="action-progress" id="action-progress">Acciones ejecutadas por el equipo: <strong id="ap-done">0</strong> / <strong id="ap-total">24</strong></div>
+          <div class="filter-tabs" id="action-filter"></div>
+          <div id="action-list"></div>
+          <div class="notes-lbl" style="margin-top:24px">Notas del equipo</div>
+          <textarea class="notes-area" id="notes-invest" oninput="updateNotesInv(this.value)" placeholder="Coordinen: ¿qué acciones ya se hicieron, quién debería hacer qué?"></textarea>
+          <div class="btn-row">
+            <button class="btn btn-s" onclick="goTo('testimonios')">&#8592; Volver a Testigos</button>
+            <button class="btn btn-p" onclick="goTo('acusacion')">Ir a Acusación →</button>
+          </div>
+        </section>
+
+        <!-- PHASE: ACUSACIÓN (team votes for culprit) -->
+        <section class="phase" id="phase-acusacion">
+          <div class="eyebrow">Acto II · La Acusación</div>
+          <h1 class="ph-title">¿Quién Fue?</h1>
+          <p class="ph-sub">El equipo tiene <strong>3 sospechosos principales</strong>. Basándose en las pruebas recogidas, <strong>voten a quién acusar formalmente</strong>. La mayoría decide. Empate: el Jefe define.</p>
+          <div id="suspect-list"></div>
+          <div class="notes-lbl" style="margin-top:20px">Debate final antes de la acusación</div>
+          <textarea class="notes-area" id="notes-acu" oninput="updateNotesAcu(this.value)" placeholder="Discutan la evidencia..."></textarea>
+          <div class="btn-row">
+            <button class="btn btn-s" onclick="goTo('investigacion')">&#8592; Volver a Investigación</button>
+            <button class="btn btn-p" id="acu-btn" onclick="confirmAcusacion()" disabled>Confirmar Acusación · Ir a Táctica →</button>
+            <span class="btn-hint" id="acu-hint">Necesitan al menos un voto</span>
           </div>
         </section>
 
@@ -889,7 +959,11 @@ function _collectState(){
     names: base.names || {},
     notes: base.notes || {act2:'',act3:'',test:'',exp:''},
     assignedRoles: base.assignedRoles || {},
-    sharedEvidence: base.sharedEvidence || {}
+    sharedEvidence: base.sharedEvidence || {},
+    culprit: base.culprit || 'cardenas',
+    actionsDone: base.actionsDone || {},
+    culpritVotes: base.culpritVotes || {},
+    accusedCulprit: base.accusedCulprit || ''
   };
 }
 
@@ -1153,7 +1227,8 @@ async function createRoom(){
   _setStatus('Creando sala…');
   var code = _randomCode();
   var pid = _playerId();
-  var initial = {phase:'', act2choices:'', finalchoice:'', outcome:'', starttime:'', roles:{}, started:false,
+  var _CULPS = ['cardenas','aether','vela']; var _rnd = _CULPS[Math.floor(Math.random()*_CULPS.length)];
+  var initial = {phase:'', act2choices:'', finalchoice:'', outcome:'', starttime:'', roles:{}, started:false, culprit:_rnd, actionsDone:{}, culpritVotes:{}, accusedCulprit:'',
     votes:{opt1:[],opt2:[],opt3:[],opt4:[],final1:[],final2:[],final3:[]},
     names:{}, notes:{act2:'',act3:'',test:''}};
   initial.names[pid] = _playerName();
@@ -1422,6 +1497,8 @@ function assignRolesRandom(){
     setRole(rid, inp);
   });
   _updateRoleMe();
+  if (typeof _renderPlayersPanel === 'function') _renderPlayersPanel();
+  if (typeof _renderRoleCards === 'function') _renderRoleCards();
   syncState();
   toast('Roles asignados aleatoriamente', 'ok');
 }
@@ -1662,6 +1739,8 @@ function manualAssign(roleId, playerId){
   _renderRoleCards();
   _renderPlayersPanel();
   _updateRoleMe();
+  if (typeof _renderPlayersPanel === 'function') _renderPlayersPanel();
+  if (typeof _renderRoleCards === 'function') _renderRoleCards();
   syncState();
 }
 window.manualAssign = manualAssign;
@@ -1672,6 +1751,362 @@ _applyState = function(s){
   _origApply2(s);
   _renderPlayersPanel();
   _renderRoleCards();
+};
+
+
+
+var CULPRITS = {
+  cardenas: {
+    name: 'Coronel (r) Marco Cárdenas',
+    profile: 'Ex-jefe de operaciones especiales. Vínculos con "Fundación Águila" (exmilitares).',
+    motive: 'Elena iba a exponer desvío de armamento militar a paramilitares.',
+    correctTactic: 'final3',
+    tacticReason: 'Solo la Operación Encubierta (interceptación en aeropuerto) puede atraparlo antes de que huya en jet privado.'
+  },
+  aether: {
+    name: 'Julian Aether (CEO de Aether Corp)',
+    profile: 'Empresario, red de contactos corporativos y políticos. Aparenta ser víctima.',
+    motive: 'Elena descubrió venta ilegal de tecnología dual (civil/militar) al extranjero.',
+    correctTactic: 'final2',
+    tacticReason: 'Solo la Trampa Financiera y Digital lo detiene: congelar sus offshore y bloquear servidores impide su fuga corporativa.'
+  },
+  vela: {
+    name: 'Ministro Ricardo Vela (Ministerio de Defensa)',
+    profile: 'Ministro en funciones. Inmunidad política y control mediático.',
+    motive: 'Elena iba a filtrar corrupción ministerial en contratos de armamento.',
+    correctTactic: 'final1',
+    tacticReason: 'Solo el Asalto Táctico Directo puede detenerlo antes de que active su inmunidad y huya bajo custodia oficial.'
+  }
+};
+
+var ROLE_ACTIONS = {
+  jefe: [
+    {id:'jefe_a1', title:'Solicitar autorización de operativo', cost:'Trámite ministerial', results:{
+      cardenas: 'La autorización sale rápido — nadie te bloquea. El poder militar prefiere no involucrarse.',
+      aether: 'Retrasos misteriosos. Un abogado corporativo de Aether presiona para "cumplir el debido proceso".',
+      vela: 'El Ministro Vela EN PERSONA firma tu autorización con extraña rapidez... y agrega restricciones que estorban.'
+    }, hints:{cardenas:'low', aether:'high', vela:'high'}},
+    {id:'jefe_a2', title:'Consultar bases de inteligencia militar', cost:'Acceso Alfa', results:{
+      cardenas: 'Registro CLASIFICADO: Cárdenas ejecutó operación idéntica en 2019 usando "Frente Rojo Popular" como pantalla.',
+      aether: 'Cero registros militares relevantes. Búsqueda inconclusa.',
+      vela: 'Acceso RESTRINGIDO por orden del Ministerio. Alguien te está bloqueando desde arriba.'
+    }, hints:{cardenas:'high', aether:'low', vela:'medium'}},
+    {id:'jefe_a3', title:'Contactar informante "Corvus"', cost:'Riesgo alto', results:{
+      cardenas: 'Corvus confirma: "Es él. Cárdenas. Prepara jet privado en Aeropuerto Los Alcones para las 18:00."',
+      aether: 'Corvus: "No es paramilitar. Buscá en la torre de vidrio de la avenida — corporativos con sicarios de importación."',
+      vela: 'Corvus: "Cuidado con el poder político. Alguien en el Ministerio está enterrando esto por dentro."'
+    }, hints:{cardenas:'high', aether:'medium', vela:'medium'}}
+  ],
+  explosivos: [
+    {id:'exp_a1', title:'Analizar firma química del RDX', cost:'2h laboratorio', results:{
+      cardenas: 'RDX lote M-217 — reportado como "destruido" por el Ejército en 2018. Cárdenas firmó la orden de destrucción.',
+      aether: 'RDX de mercado negro internacional — importado. Coincide con lote incautado en operación contra Aether hace 3 años.',
+      vela: 'RDX de reserva estratégica del Estado. Solo el Ministerio de Defensa tiene acceso.'
+    }, hints:{cardenas:'high', aether:'medium', vela:'high'}},
+    {id:'exp_a2', title:'Identificar el detonador', cost:'1h reconstrucción', results:{
+      cardenas: 'Modelo H-4 Kestrel — Fuerzas Especiales, Regimiento 7 (última unidad de Cárdenas).',
+      aether: 'Detonador comercial modificado — importación privada, sello logístico de Aether.',
+      vela: 'Detonador de fabricación oficial estatal, número de serie recortado.'
+    }, hints:{cardenas:'high', aether:'high', vela:'medium'}},
+    {id:'exp_a3', title:'Reconstruir la geometría de la carga', cost:'3h análisis', results:{
+      cardenas: 'Carga direccional profesional militar — apunta específicamente al andén 3. Objetivo: Elena Vance.',
+      aether: 'Carga corporativa: precisa pero con detalles no militares — un ingeniero civil la diseñó.',
+      vela: 'Carga con configuración de reserva estatal — no busca daño colateral. Objetivo único y silencioso.'
+    }, hints:{cardenas:'medium', aether:'medium', vela:'medium'}}
+  ],
+  hacker: [
+    {id:'hkr_a1', title:'Descifrar mensaje encriptado interceptado', cost:'4h descifrado', results:{
+      cardenas: '"Todo listo para el 15. La denunciante estará ahí. — C.M." Enviado desde IP militar.',
+      aether: '"El proyecto Ceniza en marcha. Ninguna filtración. — J.A." Enviado desde servidor Aether Corp.',
+      vela: '"El Halcón vuela mañana. Silencio total. — R.V." Enviado desde IP del Ministerio.'
+    }, hints:{cardenas:'high', aether:'high', vela:'high'}},
+    {id:'hkr_a2', title:'Rastrear origen del video "Falange Gris"', cost:'2h forense digital', results:{
+      cardenas: 'Subido desde IP de VPN militar, cerca de la Fundación Águila.',
+      aether: 'Subido desde una red corporativa vinculada a Aether Investments (subsidiaria offshore).',
+      vela: 'Subido desde edificio anexo al Ministerio de Defensa.'
+    }, hints:{cardenas:'high', aether:'high', vela:'high'}},
+    {id:'hkr_a3', title:'Auditar transacciones cripto sospechosas', cost:'3h análisis', results:{
+      cardenas: '500K USD movidos a wallet vinculada con "Fundación Águila".',
+      aether: '2M USD movidos a red de wallets offshore de Aether Investments.',
+      vela: '800K USD movidos a wallet nominal de una fundación política afín al Ministro Vela.'
+    }, hints:{cardenas:'high', aether:'high', vela:'high'}}
+  ],
+  perfilador: [
+    {id:'prf_a1', title:'Analizar el video "Falange Gris" — actuación', cost:'1h análisis conductual', results:{
+      cardenas: 'Postura y jerga militares — actuada, pero por alguien que SÍ tuvo entrenamiento militar.',
+      aether: 'Actuación demasiado producida, iluminación profesional. No es paramilitar — es propaganda corporativa.',
+      vela: 'Vocabulario oficial disfrazado. El vocero usa términos que solo funcionarios manejan.'
+    }, hints:{cardenas:'high', aether:'high', vela:'high'}},
+    {id:'prf_a2', title:'Perfilar al comprador de la furgoneta', cost:'2h reconstrucción', results:{
+      cardenas: 'Hombre 45-55, entrenamiento militar avanzado, calma extrema. Perfil: Cárdenas.',
+      aether: 'Hombre 40-50, actitud corporativa, ropa cara, no militar. Perfil: sicario contratado por élite.',
+      vela: 'Hombre 30-40, moviéndose como funcionario acostumbrado a proteger. Perfil: escolta política.'
+    }, hints:{cardenas:'high', aether:'medium', vela:'medium'}},
+    {id:'prf_a3', title:'Predecir ruta de escape del culpable', cost:'2h análisis estratégico', results:{
+      cardenas: 'Jet privado en Aeropuerto Los Alcones a las 18:00. Ruta a país sin extradición.',
+      aether: 'Vuelo comercial con documentación corporativa. Se moverá lento pero legal, escondido tras abogados.',
+      vela: 'Se atrincherará en el Ministerio invocando inmunidad. Solo operativo relámpago funciona.'
+    }, hints:{cardenas:'high', aether:'medium', vela:'high'}}
+  ],
+  campo: [
+    {id:'cmp_a1', title:'Vigilancia física del sospechoso principal', cost:'6h operativo', results:{
+      cardenas: 'Vigilancia en Fundación Águila: 12 vehículos entrando, actividad febril. Cárdenas dentro.',
+      aether: 'Vigilancia en torre Aether Corp: reunión de emergencia en piso 40. Julian Aether presente.',
+      vela: 'Vigilancia en Ministerio: convoy blindado esperando en el estacionamiento subterráneo.'
+    }, hints:{cardenas:'high', aether:'high', vela:'high'}},
+    {id:'cmp_a2', title:'Interrogar segundo guardia de la estación', cost:'1h interrogatorio', results:{
+      cardenas: '"Vi tatuajes militares — calavera con la palabra ORDEN. Uniforme desconocido pero militar."',
+      aether: '"El conductor vestía traje caro, no ropa de trabajo. Zapatos italianos, no botas."',
+      vela: '"Placas oficiales del gobierno en el vehículo de escolta que lo recogió."'
+    }, hints:{cardenas:'high', aether:'high', vela:'high'}},
+    {id:'cmp_a3', title:'Rastrear los últimos movimientos de Elena Vance', cost:'3h investigación', results:{
+      cardenas: 'Elena preparaba denuncia contra Cárdenas por desvío de armas. Última llamada: Fiscalía.',
+      aether: 'Elena había reunido evidencia contra Aether Corp — proyecto "Ceniza". Iba a enviar a Fiscalía y a prensa.',
+      vela: 'Elena tenía reunión con opositor político. Iba a entregar documentos del Ministerio a la oposición.'
+    }, hints:{cardenas:'high', aether:'high', vela:'high'}}
+  ],
+  financiero: [
+    {id:'fin_a1', title:'Auditar Vanguard Solutions', cost:'2h auditoría', results:{
+      cardenas: 'Vanguard es un fondo ciego controlado por "Fundación Águila". Beneficiario: Cárdenas.',
+      aether: 'Vanguard es subsidiaria offshore de Aether Investments. Documentos internos comprometedores.',
+      vela: 'Vanguard opera con fondos derivados del Ministerio de Defensa — fondo reservado.'
+    }, hints:{cardenas:'high', aether:'high', vela:'high'}},
+    {id:'fin_a2', title:'Rastrear origen del dinero de Vanguard', cost:'3h análisis', results:{
+      cardenas: 'Origen: cuenta militar "Fondo Operaciones Especiales". Firmante único: Cárdenas.',
+      aether: 'Origen: reventa ilegal de tecnología dual al extranjero. Aether Corp lidera la red.',
+      vela: 'Origen: fondo secreto ministerial "Halcón" bajo control directo del Ministro Vela.'
+    }, hints:{cardenas:'high', aether:'high', vela:'high'}},
+    {id:'fin_a3', title:'Analizar pagos coincidentes con el atentado', cost:'2h correlación', results:{
+      cardenas: '3 pagos coincidieron con: (1) contrato Vance, (2) auditoría bloqueada, (3) día del atentado.',
+      aether: 'Movimientos financieros masivos de Aether 48h antes del atentado — se preparaba la cobertura.',
+      vela: 'Reasignaciones internas del Ministerio: se creó fondo de "contingencia" 72h antes.'
+    }, hints:{cardenas:'high', aether:'high', vela:'high'}}
+  ],
+  forense: [
+    {id:'fns_a1', title:'Analizar ADN encontrado en la furgoneta', cost:'8h laboratorio', results:{
+      cardenas: 'ADN de Sgto. Diego Ramos — subordinado directo de Cárdenas en el Regimiento 7.',
+      aether: 'ADN de exagente corporativo — jefe de seguridad de Aether Corp hasta 2022.',
+      vela: 'ADN de escolta ministerial — asignado al Ministerio de Defensa, sin registro civil claro.'
+    }, hints:{cardenas:'high', aether:'high', vela:'high'}},
+    {id:'fns_a2', title:'Comparar huellas parciales del detonador', cost:'4h cotejo', results:{
+      cardenas: 'Coincidencia 87% con Marco Cárdenas (base militar).',
+      aether: 'Coincidencia 79% con Julian Aether — huella parcial de pulgar derecho.',
+      vela: 'Coincidencia 82% con Ricardo Vela — huella parcial del dedo índice.'
+    }, hints:{cardenas:'high', aether:'high', vela:'high'}},
+    {id:'fns_a3', title:'Analizar residuos y fibras en la furgoneta', cost:'3h análisis', results:{
+      cardenas: 'Fibra de uniforme militar 2015 (Fundación Águila) + café marca exclusiva de esa finca.',
+      aether: 'Fibra de traje italiano de alta costura + residuo de bebida gourmet de la cafetería Aether.',
+      vela: 'Fibra de uniforme oficial ministerial + rastro de tabaco de puros que solo Vela fuma.'
+    }, hints:{cardenas:'high', aether:'high', vela:'high'}}
+  ],
+  politico: [
+    {id:'pol_a1', title:'Consultar red de contactos parlamentarios', cost:'4h reuniones', results:{
+      cardenas: 'Cárdenas se reunió el mes pasado con opositores para pedir "orden y mano dura".',
+      aether: 'Julian Aether financió campañas de 8 legisladores actuales — todos afines a su agenda.',
+      vela: 'Vela tenía reuniones diarias con la cúpula del partido oficialista. Preparaba algo grande.'
+    }, hints:{cardenas:'medium', aether:'high', vela:'high'}},
+    {id:'pol_a2', title:'Analizar campaña mediática post-atentado', cost:'2h análisis', results:{
+      cardenas: 'Medios afines al Ejército piden militarización urgente. Coincide con agenda de Cárdenas.',
+      aether: 'Redes coordinadas lanzan hashtag #JusticiaParaElena — pero DESVIANDO a culpar a un lobo solitario.',
+      vela: 'Medios oficialistas cubren TODO el ángulo Aether — Ministerio quiere que no se hable de armamento estatal.'
+    }, hints:{cardenas:'high', aether:'high', vela:'high'}},
+    {id:'pol_a3', title:'Rastrear qué iba a denunciar Elena Vance', cost:'3h investigación', results:{
+      cardenas: 'Elena iba a entregar prueba de que armas militares "destruidas" terminaron en manos de Cárdenas.',
+      aether: 'Elena iba a demostrar que Aether Corp vende tecnología a regímenes bajo sanción internacional.',
+      vela: 'Elena iba a exponer red de corrupción del Ministro Vela en contratos armamentísticos.'
+    }, hints:{cardenas:'high', aether:'high', vela:'high'}}
+  ]
+};
+
+
+/* ── ACTIONS ── */
+var ACTION_FILTER = 'mine';
+
+function _totalActions(){ var n = 0; for (var r in ROLE_ACTIONS) n += ROLE_ACTIONS[r].length; return n; }
+
+function performAction(actionId){
+  if (!LOCAL_STATE) return;
+  var myRole = _myRole();
+  if (!myRole) { toast('Aún no tienes rol asignado', 'err'); return; }
+  // Find the action
+  var action = null, owner = null;
+  for (var r in ROLE_ACTIONS) {
+    var f = ROLE_ACTIONS[r].filter(function(a){return a.id===actionId;})[0];
+    if (f) { action = f; owner = r; break; }
+  }
+  if (!action) return;
+  if (owner !== myRole) { toast('Solo el rol '+ROLE_LABELS[owner]+' puede ejecutar esta acción', 'err'); return; }
+  LOCAL_STATE.actionsDone = LOCAL_STATE.actionsDone || {};
+  if (LOCAL_STATE.actionsDone[actionId]) { toast('Esta acción ya fue ejecutada', 'err'); return; }
+  // Culprit from state
+  var culprit = LOCAL_STATE.culprit || 'cardenas';
+  var result = action.results[culprit] || '(sin resultado)';
+  LOCAL_STATE.actionsDone[actionId] = {result: result, by: _playerId(), at: Date.now()};
+  _renderActions();
+  syncState();
+  toast('Acción ejecutada — resultado compartido con el equipo', 'ok');
+}
+window.performAction = performAction;
+
+function _renderActions(){
+  var host = document.getElementById('action-list'); if (!host) return;
+  var myRole = _myRole();
+  var done = (LOCAL_STATE && LOCAL_STATE.actionsDone) || {};
+  var names = (LOCAL_STATE && LOCAL_STATE.names) || {};
+  var assigned = (LOCAL_STATE && LOCAL_STATE.assignedRoles) || {};
+  // Progress
+  var totalDone = Object.keys(done).length;
+  var apDone = document.getElementById('ap-done'); if (apDone) apDone.textContent = totalDone;
+  var apTot = document.getElementById('ap-total'); if (apTot) apTot.textContent = _totalActions();
+  // Filter tabs
+  var fh = document.getElementById('action-filter');
+  if (fh && !fh.dataset.built) {
+    fh.dataset.built = '1';
+    var btns = ['<button data-f="mine" class="mine active" onclick="setActionFilter(\'mine\')">Mis acciones</button>','<button data-f="all" onclick="setActionFilter(\'all\')">Todas</button>'];
+    ROLE_IDS.forEach(function(r){ btns.push('<button data-f="'+r+'" onclick="setActionFilter(\''+r+'\')">'+ROLE_LABELS[r]+'</button>'); });
+    fh.innerHTML = btns.join('');
+  }
+  if (fh) fh.querySelectorAll('button').forEach(function(b){ b.classList.toggle('active', b.dataset.f === ACTION_FILTER); });
+
+  var out = [];
+  ROLE_IDS.forEach(function(r){
+    if (ACTION_FILTER === 'mine' && r !== myRole) return;
+    if (ACTION_FILTER !== 'mine' && ACTION_FILTER !== 'all' && r !== ACTION_FILTER) return;
+    // Who has this role
+    var ownerPid = Object.keys(assigned).filter(function(p){return assigned[p]===r;})[0];
+    var ownerName = ownerPid && names[ownerPid] ? names[ownerPid] : '— (sin asignar)';
+    ROLE_ACTIONS[r].forEach(function(act){
+      var isMine = r === myRole;
+      var d = done[act.id];
+      var cls = 'action-card' + (isMine?' mine':'') + (d?' done':'');
+      var actionHtml = d
+        ? '<div class="ac-result"><strong>Resultado:</strong> '+d.result+' <small style="color:var(--tx3);float:right">— '+(names[d.by]||'Agente')+'</small></div>'
+        : (isMine ? '<button class="ac-btn" onclick="performAction(\''+act.id+'\')">Ejecutar acción</button>' : '<span class="ac-locked-note">Solo el '+ROLE_LABELS[r]+' ('+ownerName+') puede ejecutar esto</span>');
+      out.push('<div class="'+cls+'"><div class="ac-owner">Rol: <strong>'+ROLE_LABELS[r]+'</strong> · '+ownerName+'</div><div class="ac-title">'+act.title+'</div><div class="ac-cost">Costo: '+act.cost+'</div>'+actionHtml+'</div>');
+    });
+  });
+  if (out.length === 0) out.push('<p style="color:var(--tx3);font-style:italic;padding:20px 0">No hay acciones en este filtro.</p>');
+  host.innerHTML = out.join('');
+}
+
+function setActionFilter(f){ ACTION_FILTER = f; _renderActions(); }
+window.setActionFilter = setActionFilter;
+
+function updateNotesInv(v){ if(!LOCAL_STATE) return; if(!LOCAL_STATE.notes) LOCAL_STATE.notes = {}; LOCAL_STATE.notes.invest = v; syncState(); }
+function updateNotesAcu(v){ if(!LOCAL_STATE) return; if(!LOCAL_STATE.notes) LOCAL_STATE.notes = {}; LOCAL_STATE.notes.acu = v; syncState(); }
+window.updateNotesInv = updateNotesInv; window.updateNotesAcu = updateNotesAcu;
+
+/* ── ACUSACIÓN (vote for culprit) ── */
+function voteCulprit(cid){
+  if (!LOCAL_STATE) return;
+  LOCAL_STATE.culpritVotes = LOCAL_STATE.culpritVotes || {};
+  var pid = _playerId();
+  if (LOCAL_STATE.culpritVotes[pid] === cid) delete LOCAL_STATE.culpritVotes[pid];
+  else LOCAL_STATE.culpritVotes[pid] = cid;
+  _renderSuspects();
+  syncState();
+}
+window.voteCulprit = voteCulprit;
+
+function _renderSuspects(){
+  var host = document.getElementById('suspect-list'); if (!host) return;
+  var votes = (LOCAL_STATE && LOCAL_STATE.culpritVotes) || {};
+  var names = (LOCAL_STATE && LOCAL_STATE.names) || {};
+  var pid = _playerId();
+  var cids = ['cardenas','aether','vela'];
+  var tally = {}; cids.forEach(function(c){tally[c]=[];});
+  for (var p in votes) if (tally[votes[p]]) tally[votes[p]].push(p);
+  // Determine winner (majority; tie → jefe decides)
+  var sorted = cids.slice().sort(function(a,b){return tally[b].length-tally[a].length;});
+  var winner = null;
+  if (sorted[0] && tally[sorted[0]].length > 0) {
+    if (sorted.length < 2 || tally[sorted[0]].length > tally[sorted[1]].length) winner = sorted[0];
+    else {
+      // tie: jefe decides
+      var jefePid = Object.keys((LOCAL_STATE && LOCAL_STATE.assignedRoles) || {}).filter(function(p){return LOCAL_STATE.assignedRoles[p]==='jefe';})[0];
+      if (jefePid && votes[jefePid]) winner = votes[jefePid];
+    }
+  }
+  var out = cids.map(function(c){
+    var cp = CULPRITS[c];
+    var voted = votes[pid] === c;
+    var voters = tally[c].map(function(p){return names[p]||'Agente';}).join(', ');
+    var cls = 'suspect-card'+(voted?' voted':'')+(winner===c?' winner':'');
+    return '<div class="'+cls+'" onclick="voteCulprit(\''+c+'\')">'
+      +'<div class="sc-name">'+cp.name+'</div>'
+      +'<div class="sc-profile">'+cp.profile+'</div>'
+      +'<div class="sc-motive">Motivo posible: '+cp.motive+'</div>'
+      +'<div style="font-family:\'Courier Prime\',monospace;font-size:11px;color:var(--tx2)"><strong style="color:var(--gold)">'+tally[c].length+' voto'+(tally[c].length===1?'':'s')+'</strong>'+(voters?' · '+voters:'')+(winner===c?' · <span style="color:var(--green);font-weight:700">LIDERANDO</span>':'')+'</div>'
+      +'</div>';
+  }).join('');
+  host.innerHTML = out;
+  var btn = document.getElementById('acu-btn'); if (btn) btn.disabled = !winner;
+  var hint = document.getElementById('acu-hint'); if (hint) hint.textContent = winner ? 'Acusación: '+CULPRITS[winner].name : 'Necesitan al menos un voto (o desempate del Jefe)';
+}
+
+function confirmAcusacion(){
+  if (!LOCAL_STATE || !LOCAL_STATE.culpritVotes) return;
+  var votes = LOCAL_STATE.culpritVotes;
+  var cids = ['cardenas','aether','vela'];
+  var tally = {}; cids.forEach(function(c){tally[c]=0;});
+  for (var p in votes) if (tally[votes[p]] !== undefined) tally[votes[p]]++;
+  var sorted = cids.slice().sort(function(a,b){return tally[b]-tally[a];});
+  var accused = sorted[0];
+  if (tally[accused] === 0) { toast('Nadie ha votado', 'err'); return; }
+  // handle tie by jefe
+  if (sorted[1] && tally[sorted[0]] === tally[sorted[1]]) {
+    var jefePid = Object.keys(LOCAL_STATE.assignedRoles||{}).filter(function(p){return LOCAL_STATE.assignedRoles[p]==='jefe';})[0];
+    if (jefePid && votes[jefePid]) accused = votes[jefePid];
+  }
+  LOCAL_STATE.accusedCulprit = accused;
+  goTo('act3');
+}
+window.confirmAcusacion = confirmAcusacion;
+
+/* Override executeOperation to use accusedCulprit + tactic */
+function executeOperation(){
+  var g = document.getElementById('game');
+  if (!g.dataset.finalchoice) return;
+  var final = g.dataset.finalchoice;
+  var culprit = LOCAL_STATE && LOCAL_STATE.culprit;
+  var accused = LOCAL_STATE && LOCAL_STATE.accusedCulprit;
+  var cp = CULPRITS[culprit];
+  var outcome;
+  var recap;
+  if (!accused || !culprit || !cp) {
+    outcome = 'derrota';
+    recap = 'Error interno.';
+  } else if (accused !== culprit) {
+    outcome = 'derrota';
+    recap = '<strong>ACUSACIÓN ERRÓNEA.</strong> Acusaste a <strong>'+CULPRITS[accused].name+'</strong>, pero el verdadero culpable era <strong>'+cp.name+'</strong>. El culpable escapa. Elena queda sin justicia.';
+  } else if (final === cp.correctTactic) {
+    outcome = 'victoria';
+    recap = '<strong>VICTORIA.</strong> Identificaste correctamente a <strong>'+cp.name+'</strong> y elegiste la táctica óptima. '+cp.tacticReason;
+  } else {
+    outcome = 'parcial';
+    recap = '<strong>VICTORIA PARCIAL.</strong> Identificaste al culpable (<strong>'+cp.name+'</strong>), pero la táctica no fue la óptima. Escapó a un país sin extradición, aunque su reputación quedó destruida. La táctica correcta era: <em>'+cp.tacticReason+'</em>';
+  }
+  g.dataset.outcome = outcome;
+  document.getElementById('recap-txt').innerHTML = recap;
+  setPhase('outcome');
+  syncState();
+}
+window.executeOperation = executeOperation;
+
+/* Hook applyState */
+var _origApply3 = _applyState;
+_applyState = function(s){
+  _origApply3(s);
+  var ni = document.getElementById('notes-invest'); if (ni && document.activeElement !== ni && s && s.notes && ni.value !== (s.notes.invest||'')) ni.value = s.notes.invest || '';
+  var na = document.getElementById('notes-acu'); if (na && document.activeElement !== na && s && s.notes && na.value !== (s.notes.acu||'')) na.value = s.notes.acu || '';
+  var rmi = document.getElementById('role-me-invest'); if (rmi && s && s.assignedRoles) {
+    var pid = _playerId();
+    var myRole = s.assignedRoles[pid];
+    if (myRole) { rmi.innerHTML = 'TU ROL: '+(ROLE_LABELS[myRole]||myRole).toUpperCase()+'<small>Ejecuta tus 3 acciones cuando el equipo decida</small>'; rmi.style.background='var(--gold)'; rmi.style.color='var(--bg)'; }
+    else { rmi.innerHTML = '— Sin rol asignado —<small>Regresa a la fase de Roles</small>'; }
+  }
+  if (s && s.phase === 'investigacion') _renderActions();
+  if (s && s.phase === 'acusacion') _renderSuspects();
 };
 
 
