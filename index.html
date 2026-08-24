@@ -867,6 +867,14 @@ function _collectState(){
     var id = i.id.replace(/^inp-/, '');
     if (i.value) roles[id] = i.value;
   });
+  // Also derive roles from assignedRoles+names (authoritative if present)
+  var base0 = LOCAL_STATE || {};
+  if (base0.assignedRoles && base0.names) {
+    Object.keys(base0.assignedRoles).forEach(function(pid){
+      var rid = base0.assignedRoles[pid];
+      if (rid && base0.names[pid]) roles[rid] = base0.names[pid];
+    });
+  }
   // Merge with existing local state to preserve votes/notes/names not in DOM
   var base = LOCAL_STATE || {};
   return {
@@ -909,7 +917,13 @@ function _applyState(s){
     // roles
     var roleIds = ['jefe','explosivos','hacker','perfilador','campo','financiero','forense','politico'];
     roleIds.forEach(function(id){
-      var name = (s.roles && s.roles[id]) || '';
+      // Derive name from assignedRoles+names FIRST (authoritative), fall back to legacy s.roles
+      var name = '';
+      if (s.assignedRoles && s.names) {
+        var pid = Object.keys(s.assignedRoles).filter(function(p){return s.assignedRoles[p]===id;})[0];
+        if (pid) name = s.names[pid] || '';
+      }
+      if (!name && s.roles && s.roles[id]) name = s.roles[id];
       var inp = document.getElementById('inp-'+id);
       var rb = document.getElementById('rb-'+id);
       var rc = document.getElementById('rc-'+id);
